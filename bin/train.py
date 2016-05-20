@@ -27,7 +27,7 @@ def learn():
     w2v_model = w2v.get_dialogs_model(W2V_PARAMS, dialog_lines_for_w2v)
     _logger.info('-----')
 
-    nn_model = get_nn_model(token_dict_size=len(index_to_token))
+    nn_model = get_nn_model(vocab_size=len(index_to_token))
     _logger.info('-----')
 
     train_model(nn_model, w2v_model, dialog_lines_for_nn, index_to_token)

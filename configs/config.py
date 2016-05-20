@@ -15,6 +15,7 @@ TEST_DATASET_PATH = os.path.join('data', 'test', 'test_set.txt')
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 64
 TOKEN_MIN_FREQUENCY = 5
+VOCAB_MAX_SIZE = 20000
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 128

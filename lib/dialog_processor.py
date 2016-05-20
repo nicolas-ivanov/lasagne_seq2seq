@@ -4,11 +4,12 @@ import os
 from collections import Counter
 from itertools import tee
 
-from configs.config import TOKEN_MIN_FREQUENCY
+from configs.config import VOCAB_MAX_SIZE
 from utils.utils import IterableSentences, tokenize, get_logger
 
 EOS_SYMBOL = '$$$'
 EMPTY_TOKEN = '###'
+START_TOKEN = '_START_'
 
 _logger = get_logger(__name__)
 
@@ -23,7 +24,7 @@ def get_tokens_voc(tokenized_dialog_lines):
         for token in line:
             token_counter.update([token])
 
-    token_voc = [token for token, count in token_counter.most_common() if count >= TOKEN_MIN_FREQUENCY]
+    token_voc = [token for token, _ in token_counter.most_common()[VOCAB_MAX_SIZE-1]]
     token_voc.append(EMPTY_TOKEN)
 
     return set(token_voc)

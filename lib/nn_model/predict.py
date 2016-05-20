@@ -1,7 +1,7 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH
-from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN
+from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
 from utils.utils import tokenize
@@ -27,24 +27,32 @@ def _is_good_token_sequence(token_sequence):
     return EMPTY_TOKEN not in token_sequence and token_sequence[-1] == EOS_SYMBOL
 
 
-def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, diversity):
-    input_sequence = input_sequence[:ANSWER_MAX_TOKEN_LENGTH]
+def _predict_sequence(input_sequence, nn_model, index_to_token, temperature):
+    token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
+    answer = []
 
-    X = _sequence_to_vector(input_sequence, w2v_model)
-    predictions = nn_model.predict(X, verbose=0)[0]
-    predicted_sequence = []
+    input_ids = [token_to_index[token] for token in input_sequence]
+    x_batch = [input_ids]
+    though_vector = nn_model.encode(x_batch)
 
-    for prediction_vector in predictions:
-        next_index = np.argmax(prediction_vector)
-        next_token = index_to_token[next_index]
-        predicted_sequence.append(next_token)
+    prev_state = though_vector
+    next_token = prev_token = START_TOKEN
 
-    return predicted_sequence
+    while next_token != EOS_SYMBOL and len(answer) < ANSWER_MAX_TOKEN_LENGTH:
+        next_token_probas, next_state = nn_model.decode(prev_state, prev_token)
+        next_token_id = np.argmax(next_token_probas)
+        next_token = index_to_token(next_token_id)
+        answer.append(next_token)
+
+        prev_token = next_token
+        prev_state = next_state
+
+    return answer
 
 
-def predict_sentence(sentence, nn_model, w2v_model, index_to_token, diversity=0.5):
+def predict_sentence(sentence, nn_model, w2v_model, index_to_token, temperature=0.5):
     input_sequence = tokenize(sentence + ' ' + EOS_SYMBOL)
-    tokens_sequence = _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, diversity)
+    tokens_sequence = _predict_sequence(input_sequence, nn_model, index_to_token, temperature)
     predicted_sentence = ' '.join(tokens_sequence)
 
     return predicted_sentence
