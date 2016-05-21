@@ -1,7 +1,7 @@
-import copy
 import os
 import time
 from collections import namedtuple
+from itertools import tee
 
 import numpy as np
 
@@ -56,10 +56,10 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
                 break
 
             for t_index, token in enumerate(sents_batch[s_index][:INPUT_SEQUENCE_LENGTH]):
-                X[s_index, t_index] = token_to_index(token)
+                X[s_index, t_index] = token_to_index[token]
 
             for t_index, token in enumerate(sents_batch[s_index + 1][:ANSWER_MAX_TOKEN_LENGTH]):
-                Y[s_index, t_index] = token_to_index(token)
+                Y[s_index, t_index] = token_to_index[token]
 
         yield X, Y
 
@@ -76,12 +76,25 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
     start_time = time.time()
     sents_batch_iteration = 1
 
+    tokenized_dialog_lines, dialog_lines_for_train = tee(tokenized_dialog_lines)
+
+    dialogs_lines_num = 0
+    for _ in tokenized_dialog_lines:
+        dialogs_lines_num += 1
+
     for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
-        _logger.info('Full-data-pass iteration num: ' + str(full_data_pass_num))
-        dialog_lines_for_train = copy.copy(tokenized_dialog_lines)
+        _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
 
         for X_train, Y_train in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
-            nn_model.train(X_train, Y_train)
+            progress = float(sents_batch_iteration) / dialogs_lines_num * 100
+            print '\nbatch iteration %s / %s (%.2f%%)' % (sents_batch_iteration, dialogs_lines_num, progress)
+
+            loss = nn_model.train(X_train, Y_train)
+            print 'loss %.2f' % loss
+
+            avr_time_per_sample = (time.time() - start_time) / sents_batch_iteration
+            expected_time_per_epoch = avr_time_per_sample * dialogs_lines_num
+            print 'expected time for epoch: %.1f h' % (expected_time_per_epoch / 3600)
 
             if sents_batch_iteration % TEST_PREDICTIONS_FREQUENCY == 0:
                 log_predictions(test_sentences, nn_model, w2v_model, index_to_token)

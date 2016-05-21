@@ -9,14 +9,14 @@ _logger = get_logger(__name__)
 
 
 def _train_model(tokenized_lines, params):
-    params_str = '_w' + str(params['win_size']) + '_m' + str(params['min_w_num']) + '_v' + str(params['vect_size'])
+    params_str = '_w' + str(params['win_size']) + '_v' + str(params['vocab_size']) + '_v' + str(params['vect_size'])
 
     _logger.info('Word2Vec model will be trained now. It can take long, so relax and have fun')
     _logger.info('Parameters for training: %s' % params_str)
 
     tokenized_lines_for_voc, tokenized_lines_for_train = tee(tokenized_lines)
 
-    model = Word2Vec(window=int(params['win_size']), min_count=int(params['min_w_num']), size=int(params['vect_size']),
+    model = Word2Vec(window=int(params['win_size']), max_vocab_size=int(params['vocab_size']), size=int(params['vect_size']),
                      workers=int(params['workers_num']))
     model.build_vocab(tokenized_lines_for_voc)
     model.train(tokenized_lines_for_train)
@@ -37,7 +37,7 @@ def load_model(full_bin_name):
 
 
 def get_dialogs_model(params, tokenized_lines):
-    params_str = '_w' + str(params['win_size']) + '_m' + str(params['min_w_num']) + '_v' + str(params['vect_size'])
+    params_str = '_w' + str(params['win_size']) + '_v' + str(params['vocab_size']) + '_v' + str(params['vect_size'])
     model_name = params['corpus_name'] + params_str + '.bin'
     full_bin_name = os.path.join(params['save_path'], params['new_models_dir'], model_name)
 

@@ -1,11 +1,12 @@
 import cPickle as pickle
 import os
+from collections import OrderedDict
 
 import lasagne
 import theano
 import theano.tensor as T
 from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, EmbeddingLayer, ReshapeLayer, \
-    get_output, get_all_params, get_all_param_values, set_all_param_values
+    get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape
 from lasagne.objectives import categorical_crossentropy
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH
@@ -23,7 +24,7 @@ class Lasagne_Seq2seq:
         self.decode = self._get_decoder_fun()
     
     def _get_net(self):
-        net = dict()
+        net = OrderedDict()
 
         net['l_in_x'] = InputLayer(shape=(None, None),
                             input_var=T.imatrix(name="enc_ix"),
@@ -43,15 +44,17 @@ class Lasagne_Seq2seq:
             incoming=net['l_in_y'],
             input_size=self.vocab_size,
             output_size=TOKEN_REPRESENTATION_SIZE,
-            name="y_embedding",
-            W=net['l_emb_x'].W)
+            W=net['l_emb_x'].W,
+            name="y_embedding")
 
         # encoder ###############################################
         net['l_enc'] = LSTMLayer(
             incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
-            only_return_final=True)
+            only_return_final=True,
+            name='lstm_encoder'
+        )
 
         # decoder ###############################################
         net['l_dec'] = LSTMLayer(
@@ -59,26 +62,33 @@ class Lasagne_Seq2seq:
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
-            name="decoder_lstm")
+            name='lstm_decoder'
+        )
 
         # output ###############################################
-        net['l_dec_long'] = ReshapeLayer(net['l_dec'], shape=(-1, HIDDEN_LAYER_DIMENSION))
+        net['l_dec_long'] = ReshapeLayer(
+            incoming=net['l_dec'],
+            shape=(-1, HIDDEN_LAYER_DIMENSION),
+            name='reshape layer'
+        )
 
         net['l_dist'] = DenseLayer(
             incoming=net['l_dec_long'],
             num_units=self.vocab_size,
             nonlinearity=lasagne.nonlinearities.softmax,
-            name="dense_output_probas")
+            name="dense_output_probas"
+        )
         
         return net
 
 
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])
+        target_ids = self.net['l_in_y'].input_var.flatten()
 
         cost = categorical_crossentropy(
             predictions=output_probs,
-            targets=self.net['l_in_y'].input_var
+            targets=target_ids
         ).mean()
 
         all_params = get_all_params(self.net['l_dist'], trainable=True)
@@ -95,6 +105,8 @@ class Lasagne_Seq2seq:
             inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
             outputs=cost,
             updates=updates,
+
+            # why downcasting?
             allow_input_downcast=True
         )
 
@@ -132,7 +144,7 @@ class Lasagne_Seq2seq:
                 grad_clipping=GRAD_CLIP,
                 nonlinearity=lasagne.nonlinearities.tanh,
                 only_return_final=True,
-                name="decoder_lstm")
+                name="lstm_decoder")
 
             l_dec_long = ReshapeLayer(l_dec, shape=(-1, HIDDEN_LAYER_DIMENSION))
 
@@ -142,7 +154,7 @@ class Lasagne_Seq2seq:
                 nonlinearity=lasagne.nonlinearities.softmax,
                 name="dense_output_probas")
 
-            return l_dist, l_dec
+            return l_dec, l_dist
 
         def set_decoder_weights(dec_1step_probas, dec_1step_next_state):
             """
@@ -154,18 +166,22 @@ class Lasagne_Seq2seq:
 
             for param_1step in params_1step:
                 param_1step.set_value(params_full_dict[param_1step.name].get_value())
-                
+
+        token_id_batch = T.imatrix()
 
         prev_state = InputLayer((None, HIDDEN_LAYER_DIMENSION), name="prev_decoder_state")
-        inp_token = InputLayer((None, 1), name="prev_decoder_idx", input_var=T.imatrix(name="enc_1step_ix"))
+        inp_token = InputLayer((None, 1), name="prev_decoder_idx", input_var=token_id_batch)
 
-        dec_1step_probas, dec_1step_next_state = get_decoder_1step_net(prev_state, inp_token)
-        set_decoder_weights(dec_1step_probas, dec_1step_next_state)
+        dec_1step_next_state, dec_1step_probas = get_decoder_1step_net(prev_state, inp_token)
+        set_decoder_weights(dec_1step_next_state=dec_1step_next_state, dec_1step_probas=dec_1step_probas, )
+
+        state, probas = get_output([dec_1step_next_state, dec_1step_probas])
 
         # compile
         dec_1step_fun = theano.function(
-            inputs=[inp_token.input_var, prev_state.input_var],
-            outputs=get_output([dec_1step_probas, dec_1step_next_state])
+            allow_input_downcast=True,
+            inputs=[prev_state.input_var, inp_token.input_var],
+            outputs=[state, probas]
         )
 
         return dec_1step_fun
@@ -173,12 +189,21 @@ class Lasagne_Seq2seq:
     def load_weights(self, model_path):
         with open(model_path, 'r') as f:
             data = pickle.load(f)
-        set_all_param_values(model_path, data)
+        set_all_param_values(self.net['l_dist'], data)
 
     def save_weights(self, save_path):
-        data = get_all_param_values(self)
+        data = get_all_param_values(self.net['l_dist'])
         with open(save_path, 'w') as f:
             pickle.dump(data, f)
+
+    def print_layer_shapes(self):
+        print '\n', '-'*100
+        print 'Net shapes:\n'
+
+        layers = get_all_layers(self.net['l_dist'])
+        for l in layers:
+            print '%-20s \t%s' % (l.name, get_output_shape(l))
+        print '\n', '-'*100
 
 
 def get_nn_model(vocab_size):
@@ -196,7 +221,7 @@ def get_nn_model(vocab_size):
         _logger.info("Can't find previously calculated model, so will train it from scratch")
 
     _logger.info('Model is built\n')
-
+    model.print_layer_shapes()
     return model
 
 

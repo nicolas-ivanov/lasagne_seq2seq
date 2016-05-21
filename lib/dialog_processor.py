@@ -24,8 +24,9 @@ def get_tokens_voc(tokenized_dialog_lines):
         for token in line:
             token_counter.update([token])
 
-    token_voc = [token for token, _ in token_counter.most_common()[VOCAB_MAX_SIZE-1]]
+    token_voc = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-2]]
     token_voc.append(EMPTY_TOKEN)
+    token_voc.append(START_TOKEN)
 
     return set(token_voc)
 

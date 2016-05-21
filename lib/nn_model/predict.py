@@ -35,17 +35,28 @@ def _predict_sequence(input_sequence, nn_model, index_to_token, temperature):
     x_batch = [input_ids]
     though_vector = nn_model.encode(x_batch)
 
-    prev_state = though_vector
     next_token = prev_token = START_TOKEN
+    prev_state_batch = though_vector
+
+
+    i = 0
 
     while next_token != EOS_SYMBOL and len(answer) < ANSWER_MAX_TOKEN_LENGTH:
-        next_token_probas, next_state = nn_model.decode(prev_state, prev_token)
-        next_token_id = np.argmax(next_token_probas)
-        next_token = index_to_token(next_token_id)
+        # prev_token_batch = np.array(token_to_index[prev_token], dtype=np.int)[np.newaxis]
+
+        # what the difference?
+        prev_token_batch = np.zeros((1,1), dtype=np.int)
+        prev_token_batch[0] = token_to_index[prev_token]
+
+        next_state_batch, next_token_probas_batch = \
+            nn_model.decode(prev_state_batch, prev_token_batch)
+
+        next_token_id = np.argmax(next_token_probas_batch[0])
+        next_token = index_to_token[next_token_id]
         answer.append(next_token)
 
         prev_token = next_token
-        prev_state = next_state
+        prev_state_batch = next_state_batch
 
     return answer
 
