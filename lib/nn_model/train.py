@@ -74,7 +74,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
     test_sentences = get_test_senteces(TEST_DATASET_PATH)
 
     start_time = time.time()
-    sents_batch_iteration = 1
+    batch_iteration = 1
 
     tokenized_dialog_lines, saved_iterator = tee(tokenized_dialog_lines)
 
@@ -82,26 +82,28 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
     for _ in tokenized_dialog_lines:
         dialogs_lines_num += 1
 
+    batches_num = dialogs_lines_num / SAMPLES_BATCH_SIZE
+
     for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
         _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
         dialog_lines_for_train, saved_iterator = tee(saved_iterator)
 
         for X_train, Y_train in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
-            progress = float(sents_batch_iteration) / dialogs_lines_num * 100
-            print '\nbatch iteration %s / %s (%.2f%%)' % (sents_batch_iteration, dialogs_lines_num, progress)
+            progress = float(batch_iteration) / batches_num * 100
+            print '\nbatch iteration %s / %s (%.2f%%)' % (batch_iteration, dialogs_lines_num, progress)
 
             loss = nn_model.train(X_train, Y_train)
             print 'loss %.2f' % loss
 
-            avr_time_per_sample = (time.time() - start_time) / sents_batch_iteration
-            expected_time_per_epoch = avr_time_per_sample * dialogs_lines_num
+            avr_time_per_sample = (time.time() - start_time) / batch_iteration
+            expected_time_per_epoch = avr_time_per_sample * batches_num
             print 'expected time for epoch: %.1f h' % (expected_time_per_epoch / 3600)
 
-            if sents_batch_iteration % TEST_PREDICTIONS_FREQUENCY == 0:
+            if batch_iteration % TEST_PREDICTIONS_FREQUENCY == 0:
                 log_predictions(test_sentences, nn_model, w2v_model, index_to_token)
                 save_model(nn_model)
 
-            sents_batch_iteration += 1
+            batch_iteration += 1
 
         _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
     save_model(nn_model)
