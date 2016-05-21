@@ -11,3 +11,6 @@ sudo chown -R "$USER" $dir
 
 # install required packages
 pip install -r requirements.txt
+
+# install Lasagne
+pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip

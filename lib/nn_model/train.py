@@ -76,7 +76,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
     start_time = time.time()
     sents_batch_iteration = 1
 
-    tokenized_dialog_lines, dialog_lines_for_train = tee(tokenized_dialog_lines)
+    tokenized_dialog_lines, saved_iterator = tee(tokenized_dialog_lines)
 
     dialogs_lines_num = 0
     for _ in tokenized_dialog_lines:
@@ -84,6 +84,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
 
     for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
         _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
+        dialog_lines_for_train, saved_iterator = tee(saved_iterator)
 
         for X_train, Y_train in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
             progress = float(sents_batch_iteration) / dialogs_lines_num * 100
