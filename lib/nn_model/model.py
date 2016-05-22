@@ -27,11 +27,11 @@ class Lasagne_Seq2seq:
         net = OrderedDict()
 
         net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.dtensor3(name="enc_ix"),
+                                   input_var=T.tensor3(name="enc_ix"),
                                    name="encoder_seq_ix")
 
         net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.dtensor3(name="dec_ix"),
+                                   input_var=T.tensor3(name="dec_ix"),
                                    name="decoder_seq_ix")
 
         # encoder ###############################################
