@@ -27,26 +27,23 @@ def _is_good_token_sequence(token_sequence):
     return EMPTY_TOKEN not in token_sequence and token_sequence[-1] == EOS_SYMBOL
 
 
-def _predict_sequence(input_sequence, nn_model, index_to_token, temperature):
+def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, temperature):
     token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
     answer = []
 
-    input_ids = [token_to_index[token] for token in input_sequence]
-    x_batch = [input_ids]
+    input_w2vs = [get_token_vector(token, w2v_model) for token in input_sequence]
+    x_batch = [input_w2vs]
     though_vector = nn_model.encode(x_batch)
 
     next_token = prev_token = START_TOKEN
     prev_state_batch = though_vector
 
-
-    i = 0
-
     while next_token != EOS_SYMBOL and len(answer) < ANSWER_MAX_TOKEN_LENGTH:
         # prev_token_batch = np.array(token_to_index[prev_token], dtype=np.int)[np.newaxis]
 
-        # what the difference?
-        prev_token_batch = np.zeros((1,1), dtype=np.int)
-        prev_token_batch[0] = token_to_index[prev_token]
+        # what's the difference?
+        prev_token_batch = np.zeros((1, 1, TOKEN_REPRESENTATION_SIZE))
+        prev_token_batch[0][0] = get_token_vector(prev_token, w2v_model)
 
         next_state_batch, next_token_probas_batch = \
             nn_model.decode(prev_state_batch, prev_token_batch)
@@ -63,7 +60,7 @@ def _predict_sequence(input_sequence, nn_model, index_to_token, temperature):
 
 def predict_sentence(sentence, nn_model, w2v_model, index_to_token, temperature=0.5):
     input_sequence = tokenize(sentence + ' ' + EOS_SYMBOL)
-    tokens_sequence = _predict_sequence(input_sequence, nn_model, index_to_token, temperature)
+    tokens_sequence = _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, temperature)
     predicted_sentence = ' '.join(tokens_sequence)
 
     return predicted_sentence

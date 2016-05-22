@@ -5,7 +5,7 @@ from collections import OrderedDict
 import lasagne
 import theano
 import theano.tensor as T
-from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, EmbeddingLayer, ReshapeLayer, \
+from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, \
     get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape
 from lasagne.objectives import categorical_crossentropy
 
@@ -22,34 +22,21 @@ class Lasagne_Seq2seq:
         self.train = self._get_train_fun()
         self.encode = self._get_encoder_fun()
         self.decode = self._get_decoder_fun()
-    
+
     def _get_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None),
-                            input_var=T.imatrix(name="enc_ix"),
-                            name="encoder_seq_ix")
+        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
+                                   input_var=T.dtensor3(name="enc_ix"),
+                                   name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None),
-                            input_var=T.imatrix(name="dec_ix"),
-                            name="decoder_seq_ix")
-
-        net['l_emb_x'] = EmbeddingLayer(
-            incoming=net['l_in_x'],
-            input_size=self.vocab_size,
-            output_size=TOKEN_REPRESENTATION_SIZE,
-            name="x_embedding")
-
-        net['l_emb_y'] = EmbeddingLayer(
-            incoming=net['l_in_y'],
-            input_size=self.vocab_size,
-            output_size=TOKEN_REPRESENTATION_SIZE,
-            W=net['l_emb_x'].W,
-            name="y_embedding")
+        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
+                                   input_var=T.dtensor3(name="dec_ix"),
+                                   name="decoder_seq_ix")
 
         # encoder ###############################################
         net['l_enc'] = LSTMLayer(
-            incoming=net['l_emb_x'],
+            incoming=net['l_in_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
             only_return_final=True,
@@ -58,7 +45,7 @@ class Lasagne_Seq2seq:
 
         # decoder ###############################################
         net['l_dec'] = LSTMLayer(
-            incoming=net['l_emb_y'],
+            incoming=net['l_in_y'],
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
@@ -78,17 +65,17 @@ class Lasagne_Seq2seq:
             nonlinearity=lasagne.nonlinearities.softmax,
             name="dense_output_probas"
         )
-        
-        return net
 
+        return net
 
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])
-        target_ids = self.net['l_in_y'].input_var.flatten()
+        target_ids = T.imatrix()
+        target_ids_flatten = target_ids.flatten()
 
         cost = categorical_crossentropy(
             predictions=output_probs,
-            targets=target_ids
+            targets=target_ids_flatten
         ).mean()
 
         all_params = get_all_params(self.net['l_dist'], trainable=True)
@@ -102,7 +89,7 @@ class Lasagne_Seq2seq:
 
         print("Compiling train function...")
         train_fun = theano.function(
-            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var, target_ids],
             outputs=cost,
             updates=updates,
 
@@ -111,7 +98,6 @@ class Lasagne_Seq2seq:
         )
 
         return train_fun
-
 
     def _get_encoder_fun(self):
         enc_input = self.net['l_in_x'].input_var
@@ -124,19 +110,11 @@ class Lasagne_Seq2seq:
 
         return encoder_fun
 
-
     def _get_decoder_fun(self):
-        def get_decoder_1step_net(prev_state, inp_token):
+        def get_decoder_1step_net(prev_state, emb_token):
             """
             build nn that represents 1 step of training decoder
             """
-            emb_token = EmbeddingLayer(
-                incoming=inp_token,
-                input_size=self.vocab_size,
-                output_size=TOKEN_REPRESENTATION_SIZE,
-                W=self.net['l_emb_y'].W,
-                name="y_embedding")
-
             l_dec = LSTMLayer(
                 incoming=emb_token,
                 num_units=HIDDEN_LAYER_DIMENSION,
@@ -167,13 +145,11 @@ class Lasagne_Seq2seq:
             for param_1step in params_1step:
                 param_1step.set_value(params_full_dict[param_1step.name].get_value())
 
-        token_id_batch = T.imatrix()
-
         prev_state = InputLayer((None, HIDDEN_LAYER_DIMENSION), name="prev_decoder_state")
-        inp_token = InputLayer((None, 1), name="prev_decoder_idx", input_var=token_id_batch)
+        inp_token = InputLayer((None, 1, TOKEN_REPRESENTATION_SIZE), name="prev_decoder_idx")
 
         dec_1step_next_state, dec_1step_probas = get_decoder_1step_net(prev_state, inp_token)
-        set_decoder_weights(dec_1step_next_state=dec_1step_next_state, dec_1step_probas=dec_1step_probas, )
+        set_decoder_weights(dec_1step_next_state=dec_1step_next_state, dec_1step_probas=dec_1step_probas)
 
         state, probas = get_output([dec_1step_next_state, dec_1step_probas])
 
@@ -197,13 +173,13 @@ class Lasagne_Seq2seq:
             pickle.dump(data, f)
 
     def print_layer_shapes(self):
-        print '\n', '-'*100
+        print '\n', '-' * 100
         print 'Net shapes:\n'
 
         layers = get_all_layers(self.net['l_dist'])
         for l in layers:
             print '%-20s \t%s' % (l.name, get_output_shape(l))
-        print '\n', '-'*100
+        print '\n', '-' * 100
 
 
 def get_nn_model(vocab_size):

@@ -6,8 +6,9 @@ from itertools import tee
 import numpy as np
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
-    TEST_PREDICTIONS_FREQUENCY, TEST_DATASET_PATH, NN_MODEL_PATH, FULL_LEARN_ITER_NUM
+    TEST_PREDICTIONS_FREQUENCY, TEST_DATASET_PATH, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, TOKEN_REPRESENTATION_SIZE
 from lib.nn_model.predict import predict_sentence
+from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
 
 StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_num')
@@ -48,20 +49,22 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
         if not sents_batch:
             continue
 
-        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH), dtype=np.int)
-        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int)
+        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH, TOKEN_REPRESENTATION_SIZE))
+        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE))
+        Y_ids = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int)
 
         for s_index, sentence in enumerate(sents_batch):
             if s_index == len(sents_batch) - 1:
                 break
 
             for t_index, token in enumerate(sents_batch[s_index][:INPUT_SEQUENCE_LENGTH]):
-                X[s_index, t_index] = token_to_index[token]
+                X[s_index, t_index] = get_token_vector(token, w2v_model)
 
             for t_index, token in enumerate(sents_batch[s_index + 1][:ANSWER_MAX_TOKEN_LENGTH]):
-                Y[s_index, t_index] = token_to_index[token]
+                Y[s_index, t_index] = get_token_vector(token, w2v_model)
+                Y_ids[s_index, t_index] = token_to_index[token]
 
-        yield X, Y
+        yield X, Y, Y_ids
 
 
 def save_model(nn_model):
@@ -88,11 +91,11 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, index_to_token):
         _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
         dialog_lines_for_train, saved_iterator = tee(saved_iterator)
 
-        for X_train, Y_train in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
+        for X_train, Y_train, Y_ids in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
             progress = float(batch_iteration) / batches_num * 100
             print '\nbatch iteration %s / %s (%.2f%%)' % (batch_iteration, dialogs_lines_num, progress)
 
-            loss = nn_model.train(X_train, Y_train)
+            loss = nn_model.train(X_train, Y_train, Y_ids)
             print 'loss %.2f' % loss
 
             avr_time_per_sample = (time.time() - start_time) / batch_iteration
