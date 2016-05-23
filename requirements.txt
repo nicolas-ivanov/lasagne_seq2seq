@@ -1,7 +1,9 @@
 numpy
 nltk
 six
+matplotlib
 h5py==2.5.0
 scipy==0.15.1
 gensim==0.12.1
 Theano==0.8.2
+unicodecsv==0.14.1

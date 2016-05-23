@@ -84,16 +84,15 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
     tokenized_dialog_lines, saved_iterator = tee(tokenized_dialog_lines)
 
     all_train_lines = []
-    dialogs_lines_num = 0
 
     # tokenized_dialog_lines is an iterator and only allows sequential access, so get array of train lines
     for line in tokenized_dialog_lines:
         all_train_lines.append(line)
-        dialogs_lines_num += 1
 
     train_lines_subset = random.sample(all_train_lines, len(validation_lines))
+    train_lines_num = len(all_train_lines)
 
-    batches_num = dialogs_lines_num / SAMPLES_BATCH_SIZE
+    batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
 
     try:
@@ -103,7 +102,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
             for X_train, Y_train in get_training_batch(w2v_model, lines_for_train, token_to_index):
                 progress = float(batch_id) / batches_num * 100
-                print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, dialogs_lines_num, progress)
+                print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, batches_num, progress)
 
                 loss = nn_model.train(X_train, Y_train)
                 print 'loss %.2f' % loss
