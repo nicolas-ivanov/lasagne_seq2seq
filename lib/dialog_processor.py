@@ -21,7 +21,7 @@ _logger = get_logger(__name__)
 
 def get_tokens_voc(tokenized_dialog_lines):
     """
-    :param tokenized_dialog_lines: generator for the efficient use of RAM
+    :param tokenized_dialog_lines: iterator for the efficient use of RAM
     """
     token_counter = Counter()
 
@@ -122,7 +122,12 @@ def get_lines_for_validation(validation_set_path, index_to_token):
         lines = [tokenize(line.strip()) for line in lines]
         screened_lines = get_transformed_dialog_lines(lines, index_to_token.values())
 
-    return screened_lines
+    # return true array, not iterator
+    lines_for_validation = []
+    for line in screened_lines:
+        lines_for_validation.append(line)
+
+    return lines_for_validation
 
 
 def tokenize(text):

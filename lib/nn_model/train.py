@@ -1,4 +1,5 @@
 import os
+import random
 import time
 from collections import namedtuple
 from itertools import tee
@@ -72,8 +73,6 @@ def save_model(nn_model):
 
 
 def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, index_to_token):
-    train_lines_subset = validation_lines
-    # train_lines_subset = random.sample(tokenized_dialog_lines, len(validation_lines))
     token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
 
     test_dataset = get_test_dataset()[:SMALL_TEST_DATASET_SIZE]
@@ -84,9 +83,15 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
     tokenized_dialog_lines, saved_iterator = tee(tokenized_dialog_lines)
 
+    all_train_lines = []
     dialogs_lines_num = 0
-    for _ in tokenized_dialog_lines:
+
+    # tokenized_dialog_lines is an iterator and only allows sequential access, so get array of train lines
+    for line in tokenized_dialog_lines:
+        all_train_lines.append(line)
         dialogs_lines_num += 1
+
+    train_lines_subset = random.sample(all_train_lines, len(validation_lines))
 
     batches_num = dialogs_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
@@ -94,9 +99,9 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
     try:
         for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
             _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
-            dialog_lines_for_train, saved_iterator = tee(saved_iterator)
+            lines_for_train, saved_iterator = tee(saved_iterator)
 
-            for X_train, Y_train in get_training_batch(w2v_model, dialog_lines_for_train, token_to_index):
+            for X_train, Y_train in get_training_batch(w2v_model, lines_for_train, token_to_index):
                 progress = float(batch_id) / batches_num * 100
                 print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, dialogs_lines_num, progress)
 

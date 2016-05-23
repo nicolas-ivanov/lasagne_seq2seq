@@ -149,7 +149,6 @@ def save_test_results(nn_model, w2v_model, index_to_token, start_time, current_b
                       perplexity_stamps):
     _logger.info('Saving current test results...')
     plot_perplexities(perplexity_stamps)
-    print perplexity_stamps['validation']
     cur_perplexity = perplexity_stamps['validation'][-1][1]
     stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity)
 
