@@ -4,12 +4,17 @@ import os
 from collections import Counter
 from itertools import tee
 
+import nltk.tokenize
+
 from configs.config import VOCAB_MAX_SIZE
-from utils.utils import IterableSentences, tokenize, get_logger
+from utils.utils import IterableSentences, get_logger
+
+_PUNKT_MARKS = {'.', '?', '!'}
+_tokenizer = nltk.tokenize.RegexpTokenizer(pattern=r'[#]+|[\w\$]+|[^\w\s]')
 
 EOS_SYMBOL = '$$$'
 EMPTY_TOKEN = '###'
-START_TOKEN = '_START_'
+START_TOKEN = '&&&'
 
 _logger = get_logger(__name__)
 
@@ -24,9 +29,8 @@ def get_tokens_voc(tokenized_dialog_lines):
         for token in line:
             token_counter.update([token])
 
-    token_voc = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-2]]
+    token_voc = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-1]]
     token_voc.append(EMPTY_TOKEN)
-    token_voc.append(START_TOKEN)
 
     return set(token_voc)
 
@@ -46,7 +50,7 @@ def get_transformed_dialog_lines(tokenized_dialog_lines, tokens_voc):
 def get_tokenized_dialog_lines(iterable_dialog_lines):
     for line in iterable_dialog_lines:
         tokenized_dialog_line = tokenize(line)
-        tokenized_dialog_line.append(EOS_SYMBOL)
+        tokenized_dialog_line = [START_TOKEN] + tokenized_dialog_line + [EOS_SYMBOL]
         yield tokenized_dialog_line
 
 
@@ -110,3 +114,35 @@ def get_processed_dialog_lines_and_index_to_token(corpus_path, processed_corpus_
     save_corpus(processed_dialog_lines_for_save, processed_corpus_path)
 
     return processed_dialog_lines, index_to_token
+
+
+def get_lines_for_validation(validation_set_path, index_to_token):
+    with codecs.open(validation_set_path, 'r', 'utf-8') as dataset_fh:
+        lines = dataset_fh.readlines()
+        lines = [tokenize(line.strip()) for line in lines]
+        screened_lines = get_transformed_dialog_lines(lines, index_to_token.values())
+
+    return screened_lines
+
+
+def tokenize(text):
+    tokens = _tokenizer.tokenize(text.lower())
+    return tokens
+
+
+def get_input_sequence(sentence):
+    """
+    Prepare chatbot's input by tokenizing the sentence and adding necessary punctuation marks.
+    Input: "So what's up, buddy"
+    Output: ["so", "what", "'", "s", "up", ",", "buddy", ".", "$$$"]
+    """
+    if not sentence:
+        return [START_TOKEN, EOS_SYMBOL]
+
+    # add a dot to the end of the sent in case there is no punctuation mark
+    if sentence[-1] not in _PUNKT_MARKS:
+        sentence += '.'
+
+    sequence = [START_TOKEN, tokenize(sentence), EOS_SYMBOL]
+
+    return sequence

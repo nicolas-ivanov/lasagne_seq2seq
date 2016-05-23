@@ -2,7 +2,6 @@ import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE
 
-
 def get_token_vector(token, model):
     if token in model.vocab:
         return np.array(model[token])

@@ -1,9 +1,6 @@
 import codecs
 import logging
-
-import nltk.tokenize
-
-_tokenizer = nltk.tokenize.RegexpTokenizer(pattern=r'[\w\$]+|[^\w\s]')
+import subprocess
 
 
 def get_logger(file_name):
@@ -21,11 +18,6 @@ def get_formatted_time(seconds):
     return formatted_time
 
 
-def tokenize(text):
-    tokens = _tokenizer.tokenize(text.lower())
-    return tokens
-
-
 class IterableSentences(object):
     def __init__(self, filename):
         self._filename = filename
@@ -33,3 +25,23 @@ class IterableSentences(object):
     def __iter__(self):
         for line in codecs.open(self._filename, 'r', 'utf-8'):
             yield line.strip()
+
+
+def rolling_window(token_sequence, window_size):
+    seq_window = token_sequence[:window_size]  # First window
+    yield seq_window
+
+    for new_token in token_sequence[window_size:]:  # Subsequent windows
+        seq_window[:-1] = seq_window[1:]
+        seq_window[-1] = new_token
+        yield seq_window
+
+
+def get_git_revision_short_hash():
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+
+
+class ModelLoaderException(Exception):
+    pass
+
+

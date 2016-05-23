@@ -1,7 +1,6 @@
 import os
 import time
 
-# set paths for storing models and results locally
 DATA_PATH = '/var/lib/lasagne_seq2seq'
 CORPORA_DIR = 'corpora_raw'
 PROCESSED_CORPORA_DIR = 'corpora_processed'
@@ -10,7 +9,8 @@ W2V_MODELS_DIR = 'w2v_models'
 # set paths of training and testing sets
 CORPUS_NAME = 'movie_lines_cleaned'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
-TEST_DATASET_PATH = os.path.join('data', 'test', 'test_set.txt')
+TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
+SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'small_testset.txt')
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 128
@@ -24,16 +24,14 @@ ANSWER_MAX_TOKEN_LENGTH = 10
 # set training params
 TRAIN_BATCH_SIZE = 128
 SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
-TEST_PREDICTIONS_FREQUENCY = 750
+SMALL_TEST_DATASET_SIZE = 10
+TEST_PREDICTIONS_FREQUENCY = 1
+BIG_TEST_PREDICTIONS_FREQUENCY = 1
 FULL_LEARN_ITER_NUM = 500
 
 # local paths and strs that depend on previous params
 TOKEN_INDEX_PATH = os.path.join(DATA_PATH, 'words_index', 'w_idx_' + CORPUS_NAME + '_v' + str(VOCAB_MAX_SIZE) + '.txt')
 PROCESSED_CORPUS_PATH = os.path.join(DATA_PATH, PROCESSED_CORPORA_DIR, CORPUS_NAME + '_v' + str(VOCAB_MAX_SIZE) + '.txt')
-
-DATE_INFO = time.strftime('_%d_%H_%M_')
-NN_MODEL_PARAMS_STR = '_' + CORPUS_NAME + '_w' + str(TOKEN_REPRESENTATION_SIZE) + '_l' + str(HIDDEN_LAYER_DIMENSION) + \
-                      '_s' + str(INPUT_SEQUENCE_LENGTH) + '_b' + str(TRAIN_BATCH_SIZE) + '_v' + str(VOCAB_MAX_SIZE)
 
 # w2v params that depend on previous params
 W2V_PARAMS = {
@@ -47,8 +45,38 @@ W2V_PARAMS = {
     "workers_num": 25
 }
 
-# nn params that depend on previous params
-NN_MODEL_NAME = 'seq2seq' + NN_MODEL_PARAMS_STR
-NN_MODEL_PATH = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_NAME)
-
 GRAD_CLIP = 100.
+
+NN_LAYERS_NUM = 1
+DROPOUT_RATE = 0.
+DEFAULT_TEMPERATURE = 0.5
+TEMPERATURE_VALUES = [0.3, 0.5, 0.8]
+
+def get_nn_params_str():
+    params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_bs{batch_size}'
+    params_str = params_str.format(layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION, dropout_rate=DROPOUT_RATE,
+                                   cont_len=INPUT_SEQUENCE_LENGTH, batch_size=TRAIN_BATCH_SIZE)
+
+    return params_str
+
+def get_w2v_params_str(params=W2V_PARAMS):
+    params_str = '_window{window_size}_voc{voc_size}_vec{vec_size}'
+    params_str = params_str.format(window_size=params['win_size'], voc_size=params['vocab_size'], vec_size=params['vect_size'])
+
+    return params_str
+
+def get_model_full_params_str():
+    return CORPUS_NAME + get_w2v_params_str() + get_nn_params_str()
+
+
+NN_MODEL_PARAMS_STR = get_model_full_params_str()
+
+RUN_DATE = time.strftime('_%y.%m.%d_%H:%M_')
+
+TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'res' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
+BIG_TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'big_res' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
+PERPLEXITY_PIC_PATH = os.path.join(DATA_PATH, 'perplexity', 'perplexity' + RUN_DATE + NN_MODEL_PARAMS_STR + '.png')
+PERPLEXITY_LOG_PATH = os.path.join(DATA_PATH, 'perplexity', 'perplexity' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
+DIALOGS_TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'dialogs_res_' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
+
+NN_MODEL_PATH = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_PARAMS_STR)

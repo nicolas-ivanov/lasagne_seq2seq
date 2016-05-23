@@ -7,6 +7,7 @@ sudo mkdir -p $dir'/words_index/'
 sudo mkdir -p $dir'/w2v_models/'
 sudo mkdir -p $dir'/nn_models/'
 sudo mkdir -p $dir'/results/'
+sudo mkdir -p $dir'/perplexity/'
 sudo chown -R "$USER" $dir
 
 # install required packages
