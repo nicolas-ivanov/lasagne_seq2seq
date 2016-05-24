@@ -51,8 +51,8 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
         if not sents_batch:
             continue
 
-        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH), dtype=np.int)
-        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int)
+        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH), dtype=np.int32)
+        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
 
         for s_index, sentence in enumerate(sents_batch):
             if s_index == len(sents_batch) - 1:
