@@ -23,6 +23,7 @@ class Lasagne_Seq2seq:
         self.predict = self._get_predict_fun()
         self.encode = self._get_encoder_fun()
         self.decode = self._get_decoder_fun()
+        self.embedding = self._get_embedding_fun()
     
     def _get_net(self):
         net = OrderedDict()
@@ -103,6 +104,12 @@ class Lasagne_Seq2seq:
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])   # "long" 2d matrix with prob distribution
 
+        # params = {
+        #     self.net['l_in_x'].input_var: [[1,2,3]],
+        #     self.net['l_in_y'].input_var:  [[4,5,6,7]]
+        # }
+        # print output_probs.eval(params).shape
+
         # cut off the first ids from every id sequence: they correspond to START_TOKEN, that we are not predicting
         target_ids = self.net['l_in_y'].input_var[:, 1:]
         target_ids = target_ids.flatten()               # "long" vector with target ids
@@ -118,7 +125,7 @@ class Lasagne_Seq2seq:
         updates = lasagne.updates.rmsprop(
             loss_or_grads=cost,
             params=all_params,
-            learning_rate=0.1       # hm, what learning rate should be here?
+            learning_rate=0.01       # hm, what learning rate should be here?
         )
 
         print("Compiling train function...")
@@ -141,6 +148,18 @@ class Lasagne_Seq2seq:
         )
 
         return predict_fun
+
+
+    def _get_embedding_fun(self):
+        emb_x = get_output(self.net['l_emb_x'])           # "long" 2d matrix with prob distribution
+
+        print("Compiling embedding function...")
+        embed_fun = theano.function(
+            inputs=[self.net['l_in_x'].input_var],
+            outputs=emb_x
+        )
+
+        return embed_fun
 
 
     def _get_encoder_fun(self):

@@ -64,6 +64,8 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
             for t_index, token in enumerate(sents_batch[s_index + 1][:ANSWER_MAX_TOKEN_LENGTH]):
                 Y[s_index, t_index] = token_to_index[token]
 
+        X = np.fliplr(X)  # reverse inputs
+
         yield X, Y
 
 
