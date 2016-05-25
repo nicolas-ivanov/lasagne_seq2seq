@@ -27,11 +27,12 @@ def predict():
     w2v_model = w2v.get_dialogs_model(W2V_PARAMS, dialog_lines_for_w2v)
     _logger.info('-----')
 
-    nn_model = get_nn_model(token_dict_size=len(index_to_token))
+    nn_model = get_nn_model(vocab_size=len(index_to_token))
 
     while True:
         input_sentence = raw_input('> ')
-        get_nn_response(input_sentence, nn_model, w2v_model, index_to_token)
+        response, perplexity = get_nn_response(input_sentence, nn_model, w2v_model, index_to_token)
+        print '%s [%.2f]' % (response, perplexity)
 
 
 if __name__ == '__main__':

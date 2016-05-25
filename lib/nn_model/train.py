@@ -107,6 +107,14 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
             lines_for_train, saved_iterator = tee(saved_iterator)
 
             for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
+
+                # print X_train[0]
+                # print Y_train[0]
+                # print Y_ids[0]
+
+                # print nn_model.decoding(X_train, Y_train)
+                # print nn_model.slicing(X_train, Y_train)
+
                 loss = nn_model.train(X_train, Y_train, Y_ids)
 
                 progress = float(batch_id) / batches_num * 100
@@ -120,7 +128,9 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                     print '\n'
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
-                        print '%-50s\t -> \t%s [%s]' % (sent, prediction, perplexity)
+                        print '%-50s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
+
+                    print '\n\n\n'
 
                 if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
                     save_model(nn_model)

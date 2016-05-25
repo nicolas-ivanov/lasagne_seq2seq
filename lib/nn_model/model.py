@@ -6,13 +6,30 @@ import lasagne
 import theano
 import theano.tensor as T
 from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, \
-    get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer
+    get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer, \
+    ConcatLayer
 from lasagne.objectives import categorical_crossentropy
 
-from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE
+from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
+    ANSWER_MAX_TOKEN_LENGTH
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
+
+
+class Repeat(lasagne.layers.Layer):
+    def __init__(self, incoming, n, **kwargs):
+        super(Repeat, self).__init__(incoming, **kwargs)
+        self.n = n
+
+    def get_output_shape_for(self, input_shape):
+        return tuple([input_shape[0], self.n] + list(input_shape[1:]))
+
+    def get_output_for(self, input, **kwargs):
+        tensors = [input] * self.n
+        stacked = theano.tensor.stack(*tensors)
+        dim = [1, 0] + range(2, input.ndim + 1)
+        return stacked.dimshuffle(dim)
 
 
 class Lasagne_Seq2seq:
@@ -24,7 +41,9 @@ class Lasagne_Seq2seq:
         self.encode = self._get_encoder_fun()
         self.decode = self._get_decoder_fun()
         self.embedding = self._get_embedding_fun()
-    
+        self.slicing = self._get_slice_fun()
+        self.decoding = self._get_dec_fun()
+
     def _get_net(self):
         net = OrderedDict()
 
@@ -46,10 +65,13 @@ class Lasagne_Seq2seq:
         )
 
         # decoder ###############################################
+        net['l_enc_repeated'] = Repeat(net['l_enc'], ANSWER_MAX_TOKEN_LENGTH)
+        net['l_concat'] = ConcatLayer([net['l_in_y'], net['l_enc_repeated']], axis=2)
+
         net['l_dec'] = LSTMLayer(
-            incoming=net['l_in_y'],
+            incoming=net['l_concat'],
             num_units=HIDDEN_LAYER_DIMENSION,
-            hid_init=net['l_enc'],
+            # hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
             name='lstm_decoder'
         )
@@ -63,7 +85,7 @@ class Lasagne_Seq2seq:
         # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
         net['l_slice'] = SliceLayer(
             incoming=net['l_dec'],
-            indices=slice(None, -1),    # leave all but the last token
+            indices=slice(0, -1),    # keep all but the last token
             axis=1,                     # sequneces axis
             name='slice layer'
         )
@@ -88,12 +110,6 @@ class Lasagne_Seq2seq:
 
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])   # "long" 2d matrix with prob distribution
-
-        # params = {
-        #     self.net['l_in_x'].input_var: [[1,2,3]],
-        #     self.net['l_in_y'].input_var:  [[4,5,6,7]]
-        # }
-        # print output_probs.eval(params).shape
 
         input_ids = T.imatrix()
         # cut off the first ids from every id sequence: they correspond to START_TOKEN, that we are not predicting
@@ -146,6 +162,28 @@ class Lasagne_Seq2seq:
         )
 
         return encoder_fun
+
+
+    def _get_dec_fun(self):
+        dec_out = get_output(self.net['l_dec'])  # "long" 2d matrix with prob distribution
+
+        dec_fun = theano.function(
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
+            outputs=dec_out
+        )
+
+        return dec_fun
+
+
+    def _get_slice_fun(self):
+        sliced_tensor = get_output(self.net['l_slice'])  # "long" 2d matrix with prob distribution
+
+        slice_fun = theano.function(
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
+            outputs=sliced_tensor
+        )
+
+        return slice_fun
 
 
     def _get_encoder_fun(self):

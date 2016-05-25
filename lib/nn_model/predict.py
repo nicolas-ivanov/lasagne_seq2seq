@@ -75,8 +75,8 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
 
         # probs_batch has shape (batch_size * seq_len, vocab_size)
         # we only need the last prediction, so take it
-        last_token_prob_dist = probs_batch[-1]
-        next_token_id, next_token_prob = _sample(last_token_prob_dist, temperature)
+        curr_token_prob_dist = probs_batch[i]
+        next_token_id, next_token_prob = _sample(curr_token_prob_dist, temperature)
 
         next_token = index_to_token[next_token_id]
         response.append(next_token)
