@@ -15,7 +15,7 @@ from lib.nn_model.predict import get_nn_response, get_responses_for_temperatures
 from utils.utils import get_formatted_time, get_git_revision_short_hash, get_logger
 from configs.config import RUN_DATE, TEST_DATASET_PATH, DEFAULT_TEMPERATURE, \
     TEST_RESULTS_PATH, BIG_TEST_RESULTS_PATH, PERPLEXITY_LOG_PATH, PERPLEXITY_PIC_PATH, NN_MODEL_PARAMS_STR, \
-    TEMPERATURE_VALUES
+    TEMPERATURE_VALUES, SMALL_TEST_DATASET_SIZE
 
 _logger = get_logger(__name__)
 
@@ -155,5 +155,5 @@ def save_test_results(nn_model, w2v_model, index_to_token, start_time, current_b
     test_dataset = get_test_dataset()
     log_predictions(test_dataset, nn_model, w2v_model, index_to_token, stats_info)
 
-    # small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
-    # _log_predictions_with_temperatures(small_test_dataset, nn_model, w2v_model, index_to_token, stats_info)
+    small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
+    _log_predictions_with_temperatures(small_test_dataset, nn_model, w2v_model, index_to_token, stats_info)

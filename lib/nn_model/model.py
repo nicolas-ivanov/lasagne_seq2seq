@@ -60,13 +60,98 @@ class Lasagne_Seq2seq:
             incoming=net['l_in_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
+            name='lstm_encoder'
+        )
+
+        net['l_enc_2'] = LSTMLayer(
+            incoming=net['l_enc'],
+            num_units=HIDDEN_LAYER_DIMENSION,
+            grad_clipping=GRAD_CLIP,
+            only_return_final=True,
+            name='lstm_encoder_2'
+        )
+
+        # decoder ###############################################
+
+        net['l_dec'] = LSTMLayer(
+            incoming=net['l_in_y'],
+            num_units=HIDDEN_LAYER_DIMENSION,
+            hid_init=net['l_enc_2'],
+            grad_clipping=GRAD_CLIP,
+            name='lstm_decoder'
+        )
+
+        net['l_dec_2'] = LSTMLayer(
+            incoming=net['l_dec'],
+            num_units=HIDDEN_LAYER_DIMENSION,
+            grad_clipping=GRAD_CLIP,
+            name='lstm_decoder_2'
+        )
+
+        # decoder returns the batch of sequences of though vectors, each corresponds to a decoded token
+        # reshape this 3d tensor to 2d matrix so that the next Dense layer can convert each though vector to
+        # probability distribution vector
+
+        # output ###############################################
+        # cut off the last prob vectors for every prob sequence:
+        # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
+        net['l_slice'] = SliceLayer(
+            incoming=net['l_dec_2'],
+            indices=slice(0, -1),  # keep all but the last token
+            axis=1,  # sequneces axis
+            name='slice_layer'
+        )
+
+        net['l_dec_long'] = ReshapeLayer(
+            incoming=net['l_slice'],
+            shape=(-1, HIDDEN_LAYER_DIMENSION),  # reshape the layer so that we ca
+            name='reshape_layer'
+        )
+
+        net['l_dist'] = DenseLayer(
+            incoming=net['l_dec_long'],
+            num_units=self.vocab_size,
+            nonlinearity=lasagne.nonlinearities.softmax,
+            name="dense_output_probas"
+        )
+
+        # don't need to reshape back, can compare this "long" output with true one-hot vectors
+
+        return net
+
+
+    def _get_concat_net(self):
+        net = OrderedDict()
+
+        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
+                                   input_var=T.tensor3(name="enc_ix"),
+                                   name="encoder_seq_ix")
+
+        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
+                                   input_var=T.tensor3(name="dec_ix"),
+                                   name="decoder_seq_ix")
+
+        # encoder ###############################################
+        net['l_enc'] = LSTMLayer(
+            incoming=net['l_in_x'],
+            num_units=HIDDEN_LAYER_DIMENSION,
+            grad_clipping=GRAD_CLIP,
             only_return_final=True,
             name='lstm_encoder'
         )
 
         # decoder ###############################################
-        net['l_enc_repeated'] = Repeat(net['l_enc'], ANSWER_MAX_TOKEN_LENGTH)
-        net['l_concat'] = ConcatLayer([net['l_in_y'], net['l_enc_repeated']], axis=2)
+        net['l_enc_repeated'] = Repeat(
+            incoming=net['l_enc'],
+            n=ANSWER_MAX_TOKEN_LENGTH,
+            name='repeat_layer'
+        )
+
+        net['l_concat'] = ConcatLayer(
+            incomings=[net['l_in_y'], net['l_enc_repeated']],
+            axis=2,
+            name='concat_layer'
+        )
 
         net['l_dec'] = LSTMLayer(
             incoming=net['l_concat'],
@@ -87,13 +172,13 @@ class Lasagne_Seq2seq:
             incoming=net['l_dec'],
             indices=slice(0, -1),    # keep all but the last token
             axis=1,                     # sequneces axis
-            name='slice layer'
+            name='slice_layer'
         )
 
         net['l_dec_long'] = ReshapeLayer(
             incoming=net['l_slice'],
             shape=(-1, HIDDEN_LAYER_DIMENSION),     # reshape the layer so that we ca
-            name='reshape layer'
+            name='reshape_layer'
         )
 
         net['l_dist'] = DenseLayer(
