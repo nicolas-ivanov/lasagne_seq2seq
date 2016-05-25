@@ -71,7 +71,7 @@ class Lasagne_Seq2seq:
         net['l_dec'] = LSTMLayer(
             incoming=net['l_concat'],
             num_units=HIDDEN_LAYER_DIMENSION,
-            # hid_init=net['l_enc'],
+            hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
             name='lstm_decoder'
         )

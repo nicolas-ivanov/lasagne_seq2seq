@@ -4,6 +4,7 @@ import time
 from collections import namedtuple
 from itertools import tee
 
+import datetime
 import numpy as np
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
@@ -125,12 +126,13 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                       % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
-                    print '\n'
+                    print '\n%s\n' % datetime.datetime.now().time()
+
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
                         print '%-50s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
 
-                    print '\n\n\n'
+                    print '\n'
 
                 if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
                     save_model(nn_model)
