@@ -9,7 +9,7 @@ from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, \
     get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer
 from lasagne.objectives import categorical_crossentropy
 
-from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH
+from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
@@ -111,7 +111,7 @@ class Lasagne_Seq2seq:
         updates = lasagne.updates.rmsprop(
             loss_or_grads=cost,
             params=all_params,
-            learning_rate=0.01       # hm, what learning rate should be here?
+            learning_rate=LEARNING_RATE
         )
 
         print("Compiling train function...")

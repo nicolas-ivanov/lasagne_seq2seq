@@ -134,5 +134,4 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
     except (KeyboardInterrupt, SystemExit):
         _logger.info('Training cycle is stopped manually')
         _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
-        save_model(nn_model)
         save_test_results(nn_model, w2v_model, index_to_token, start_time, batch_id, batches_num, perplexity_stamps)

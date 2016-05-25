@@ -1,7 +1,7 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH, TEMPERATURE_VALUES, \
-    INPUT_SEQUENCE_LENGTH
+    INPUT_SEQUENCE_LENGTH, VOCAB_MAX_SIZE
 from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN, get_input_sequence
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
@@ -15,7 +15,7 @@ def _sample(probs, temperature=1.0):
     """
     strethced_probs = np.log(probs) / temperature
     strethced_probs = np.exp(strethced_probs) / np.sum(np.exp(strethced_probs))
-    idx = np.argmax(np.random.multinomial(1, strethced_probs, 1))
+    idx = np.random.choice(np.arange(VOCAB_MAX_SIZE), p=strethced_probs)
     idx_prob = strethced_probs[idx]
     return idx, idx_prob
 
