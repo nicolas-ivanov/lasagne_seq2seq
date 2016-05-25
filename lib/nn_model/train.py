@@ -52,8 +52,8 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
         if not sents_batch:
             continue
 
-        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH, TOKEN_REPRESENTATION_SIZE))
-        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE))
+        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH, TOKEN_REPRESENTATION_SIZE), dtype=np.float32)
+        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE), dtype=np.float32)
         Y_ids = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
 
         for s_index, sentence in enumerate(sents_batch):
@@ -107,7 +107,6 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                 progress = float(batch_id) / batches_num * 100
                 print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, batches_num, progress)
 
-                print X_train.shape, Y_train.shape, Y_ids.shape
                 loss = nn_model.train(X_train, Y_train, Y_ids)
                 print 'loss %.2f' % loss
 
