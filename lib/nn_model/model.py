@@ -6,7 +6,7 @@ import lasagne
 import theano
 import theano.tensor as T
 from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, EmbeddingLayer, ReshapeLayer, \
-    get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape
+    get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer
 from lasagne.objectives import categorical_crossentropy
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH
@@ -20,6 +20,7 @@ class Lasagne_Seq2seq:
         self.vocab_size = vocab_size
         self.net = self._get_net()
         self.train = self._get_train_fun()
+        self.predict = self._get_predict_fun()
         self.encode = self._get_encoder_fun()
         self.decode = self._get_decoder_fun()
     
@@ -72,8 +73,17 @@ class Lasagne_Seq2seq:
         # probability distribution vector
 
         # output ###############################################
-        net['l_dec_long'] = ReshapeLayer(
+        # cut off the last prob vectors for every prob sequence:
+        # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
+        net['l_slice'] = SliceLayer(
             incoming=net['l_dec'],
+            indices=slice(None, -1),    # leave all but the last token
+            axis=1,                     # sequneces axis
+            name='slice layer'
+        )
+
+        net['l_dec_long'] = ReshapeLayer(
+            incoming=net['l_slice'],
             shape=(-1, HIDDEN_LAYER_DIMENSION),     # reshape the layer so that we ca
             name='reshape layer'
         )
@@ -91,8 +101,11 @@ class Lasagne_Seq2seq:
 
 
     def _get_train_fun(self):
-        output_probs = get_output(self.net['l_dist'])           # "long" 2d matrix with prob distribution
-        target_ids = self.net['l_in_y'].input_var.flatten()     # "long" vector with true token ids
+        output_probs = get_output(self.net['l_dist'])   # "long" 2d matrix with prob distribution
+
+        # cut off the first ids from every id sequence: they correspond to START_TOKEN, that we are not predicting
+        target_ids = self.net['l_in_y'].input_var[:, 1:]
+        target_ids = target_ids.flatten()               # "long" vector with target ids
 
         cost = categorical_crossentropy(
             predictions=output_probs,
@@ -116,6 +129,18 @@ class Lasagne_Seq2seq:
         )
 
         return train_fun
+
+
+    def _get_predict_fun(self):
+        output_probs = get_output(self.net['l_dist'])           # "long" 2d matrix with prob distribution
+
+        print("Compiling predict function...")
+        predict_fun = theano.function(
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
+            outputs=output_probs
+        )
+
+        return predict_fun
 
 
     def _get_encoder_fun(self):

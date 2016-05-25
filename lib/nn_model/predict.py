@@ -1,6 +1,7 @@
 import numpy as np
 
-from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH, TEMPERATURE_VALUES
+from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH, TEMPERATURE_VALUES, \
+    INPUT_SEQUENCE_LENGTH
 from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN, get_input_sequence
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
@@ -51,31 +52,30 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
             token_id = token_to_index[EMPTY_TOKEN]
         input_ids.append(token_id)
 
-    x_batch = [input_ids]
-    though_vector = nn_model.encode(x_batch)
+    x_batch = np.zeros((1, INPUT_SEQUENCE_LENGTH), dtype=np.int32)
+    for i, token_id in enumerate(input_ids[-INPUT_SEQUENCE_LENGTH:]):
+        x_batch[0][i] = token_id
 
-    next_token = prev_token = START_TOKEN
-    prev_state_batch = though_vector
+    curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
+    curr_y_batch[0][0] = token_to_index[START_TOKEN]
 
-    while next_token != EOS_SYMBOL and len(response) < ANSWER_MAX_TOKEN_LENGTH:
-        # prev_token_batch = np.array(token_to_index[prev_token], dtype=np.int)[np.newaxis]
+    next_token = START_TOKEN
+    i = 0
 
-        # what's the difference?
-        prev_token_batch = np.zeros((1,1), dtype=np.int)
-        prev_token_batch[0] = token_to_index[prev_token]
+    while next_token != EOS_SYMBOL and len(response) < ANSWER_MAX_TOKEN_LENGTH-1:
+        probs_batch = nn_model.predict(x_batch, curr_y_batch)
 
-        next_state_batch, next_token_probas_batch = \
-            nn_model.decode(prev_state_batch, prev_token_batch)
-
-        next_token_dist = next_token_probas_batch[0]
-        next_token_id, next_token_prob = _sample(next_token_dist, temperature)
+        # probs_batch has shape (batch_size * seq_len, vocab_size)
+        # we only need the last prediction, so take it
+        last_token_prob_dist = probs_batch[-1]
+        next_token_id, next_token_prob = _sample(last_token_prob_dist, temperature)
 
         next_token = index_to_token[next_token_id]
         response.append(next_token)
         tokens_probs.append(next_token_prob)
 
-        prev_token = next_token
-        prev_state_batch = next_state_batch
+        i += 1
+        curr_y_batch[0][i] = next_token_id
 
     response_perplexity = get_sequence_perplexity(tokens_probs)
 

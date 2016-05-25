@@ -149,6 +149,6 @@ def get_input_sequence(sentence):
     if sentence[-1] not in _PUNKT_MARKS:
         sentence += '.'
 
-    sequence = [START_TOKEN, tokenize(sentence), EOS_SYMBOL]
+    sequence = [START_TOKEN] + tokenize(sentence) + [EOS_SYMBOL]
 
     return sequence
