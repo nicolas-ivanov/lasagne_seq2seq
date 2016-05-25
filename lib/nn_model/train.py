@@ -67,10 +67,13 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
                 Y[s_index, t_index] = get_token_vector(token, w2v_model)
                 Y_ids[s_index, t_index] = token_to_index[token]
 
+        X = np.fliplr(X)  # reverse inputs
+
         yield X, Y, Y_ids
 
 
 def save_model(nn_model):
+    print 'Saving model...'
     model_full_path = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_PATH)
     nn_model.save_weights(model_full_path)
 
@@ -104,17 +107,17 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
             lines_for_train, saved_iterator = tee(saved_iterator)
 
             for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
-                progress = float(batch_id) / batches_num * 100
-                print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, batches_num, progress)
-
                 loss = nn_model.train(X_train, Y_train, Y_ids)
-                print 'loss %.2f' % loss
 
+                progress = float(batch_id) / batches_num * 100
                 avr_time_per_sample = (time.time() - start_time) / batch_id
                 expected_time_per_epoch = avr_time_per_sample * batches_num
-                print 'expected time for epoch: %.1f h' % (expected_time_per_epoch / 3600)
+
+                print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
+                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
+                    print '\n'
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
                         print '%-50s\t -> \t%s [%s]' % (sent, prediction, perplexity)

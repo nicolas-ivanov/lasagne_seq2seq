@@ -62,6 +62,8 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
     for i, token_vector in enumerate(input_vectors[-INPUT_SEQUENCE_LENGTH:]):
         x_batch[0][i] = token_vector
 
+    x_batch = np.fliplr(x_batch)  # reverse inputs
+
     curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE), dtype=np.float32)
     curr_y_batch[0][0] = get_token_vector(START_TOKEN, w2v_model)
 
