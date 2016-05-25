@@ -15,6 +15,7 @@ _tokenizer = nltk.tokenize.RegexpTokenizer(pattern=r'[#]+|[\w\$]+|[^\w\s]')
 EOS_SYMBOL = '$$$'
 EMPTY_TOKEN = '###'
 START_TOKEN = '&&&'
+PAD_TOKEN = '___'
 
 _logger = get_logger(__name__)
 
@@ -29,10 +30,10 @@ def get_tokens_voc(tokenized_dialog_lines):
         for token in line:
             token_counter.update([token])
 
-    token_voc = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-1]]
-    token_voc.append(EMPTY_TOKEN)
+    freq_tokens = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-2]]
+    token_voc = [PAD_TOKEN, EMPTY_TOKEN] + freq_tokens
 
-    return set(token_voc)
+    return token_voc
 
 
 def get_transformed_dialog_lines(tokenized_dialog_lines, tokens_voc):

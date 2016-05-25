@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 import lasagne
-import numpy as np
 import theano
 import theano.tensor as T
 from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, EmbeddingLayer, ReshapeLayer, \
@@ -94,16 +93,6 @@ class Lasagne_Seq2seq:
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])           # "long" 2d matrix with prob distribution
         target_ids = self.net['l_in_y'].input_var.flatten()     # "long" vector with true token ids
-
-        # target_ids = get_output(FlattenLayer(
-        #      incoming=self.net['l_in_y'],
-        #      outdim=1
-        # ))
-        print target_ids.shape.eval({self.net['l_in_y'].input_var: np.zeros((2, 3), dtype=np.int32)})
-        print output_probs.shape.eval({self.net['l_in_x'].input_var: np.zeros((2, 3), dtype=np.int32),
-                                       self.net['l_in_y'].input_var: np.zeros((2, 3), dtype=np.int32)})
-        print output_probs.sum(axis=1).eval({self.net['l_in_x'].input_var: np.zeros((2, 3), dtype=np.int32),
-                                       self.net['l_in_y'].input_var: np.zeros((2, 3), dtype=np.int32)})
 
         cost = categorical_crossentropy(
             predictions=output_probs,
@@ -215,7 +204,6 @@ class Lasagne_Seq2seq:
 
         # compile
         dec_1step_fun = theano.function(
-            allow_input_downcast=True,
             inputs=[prev_state.input_var, inp_token.input_var],
             outputs=[state, probas]
         )
