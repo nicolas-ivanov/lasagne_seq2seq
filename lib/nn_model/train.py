@@ -8,9 +8,10 @@ import numpy as np
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
-    SMALL_TEST_DATASET_SIZE
+    SMALL_TEST_DATASET_SIZE, TOKEN_REPRESENTATION_SIZE
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset
 from lib.nn_model.predict import get_nn_response
+from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
 
 StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_num')
@@ -51,22 +52,22 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
         if not sents_batch:
             continue
 
-        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH), dtype=np.int32)
-        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
+        X = np.zeros((len(sents_batch), INPUT_SEQUENCE_LENGTH, TOKEN_REPRESENTATION_SIZE))
+        Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE))
+        Y_ids = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
 
         for s_index, sentence in enumerate(sents_batch):
             if s_index == len(sents_batch) - 1:
                 break
 
-            for t_index, token in enumerate(sents_batch[s_index][-INPUT_SEQUENCE_LENGTH:]):
-                X[s_index, t_index] = token_to_index[token]
+            for t_index, token in enumerate(sents_batch[s_index][:INPUT_SEQUENCE_LENGTH]):
+                X[s_index, t_index] = get_token_vector(token, w2v_model)
 
             for t_index, token in enumerate(sents_batch[s_index + 1][:ANSWER_MAX_TOKEN_LENGTH]):
-                Y[s_index, t_index] = token_to_index[token]
+                Y[s_index, t_index] = get_token_vector(token, w2v_model)
+                Y_ids[s_index, t_index] = token_to_index[token]
 
-        X = np.fliplr(X)  # reverse inputs
-
-        yield X, Y
+        yield X, Y, Y_ids
 
 
 def save_model(nn_model):
@@ -102,11 +103,12 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
             _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
             lines_for_train, saved_iterator = tee(saved_iterator)
 
-            for X_train, Y_train in get_training_batch(w2v_model, lines_for_train, token_to_index):
+            for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
                 progress = float(batch_id) / batches_num * 100
                 print '\nbatch iteration %s / %s (%.2f%%)' % (batch_id, batches_num, progress)
 
-                loss = nn_model.train(X_train, Y_train)
+                print X_train.shape, Y_train.shape, Y_ids.shape
+                loss = nn_model.train(X_train, Y_train, Y_ids)
                 print 'loss %.2f' % loss
 
                 avr_time_per_sample = (time.time() - start_time) / batch_id

@@ -1,13 +1,14 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE
+from lib.dialog_processor import EMPTY_TOKEN
+
 
 def get_token_vector(token, model):
     if token in model.vocab:
         return np.array(model[token])
 
-    # return a zero vector for the words that are not presented in the model
-    return np.zeros(TOKEN_REPRESENTATION_SIZE)
+    return np.array(model[EMPTY_TOKEN])
 
 
 def get_vectorized_token_sequence(sequence, w2v_model, max_sequence_length, reverse=False):

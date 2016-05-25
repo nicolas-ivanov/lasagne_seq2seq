@@ -52,14 +52,21 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
             token_id = token_to_index[EMPTY_TOKEN]
         input_ids.append(token_id)
 
-    x_batch = np.zeros((1, INPUT_SEQUENCE_LENGTH), dtype=np.int32)
-    for i, token_id in enumerate(input_ids[-INPUT_SEQUENCE_LENGTH:]):
-        x_batch[0][i] = token_id
+    input_vectors = []
+    for token in input_sequence:
+        token_vector = get_token_vector(token, w2v_model)
+        input_vectors.append(token_vector)
 
-    x_batch = np.fliplr(x_batch)  # reverse inputs
+    x_batch = np.zeros((1, INPUT_SEQUENCE_LENGTH, TOKEN_REPRESENTATION_SIZE))
 
-    curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
-    curr_y_batch[0][0] = token_to_index[START_TOKEN]
+    for i, token_vector in enumerate(input_vectors[-INPUT_SEQUENCE_LENGTH:]):
+        x_batch[0][i] = token_vector
+
+    curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE))
+    curr_y_batch[0][0] = get_token_vector(START_TOKEN, w2v_model)
+
+    curr_ids_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
+    curr_ids_batch[0][0] = token_to_index[START_TOKEN]
 
     next_token = START_TOKEN
     i = 0
@@ -77,7 +84,8 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
         tokens_probs.append(next_token_prob)
 
         i += 1
-        curr_y_batch[0][i] = next_token_id
+        curr_y_batch[0][i] = get_token_vector(next_token, w2v_model)
+        curr_ids_batch[0][i] = next_token_id
 
     response_perplexity = get_sequence_perplexity(tokens_probs)
 
