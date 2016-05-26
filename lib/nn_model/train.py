@@ -110,50 +110,51 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
             _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
             lines_for_train, saved_iterator = tee(saved_iterator)
 
-        for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
+            for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
 
-            # print X_train[0]
-            # print Y_train[0]
-            # print Y_ids[0]
-            #
-            # print nn_model.decoding(X_train, Y_train)
-            # print nn_model.slicing(X_train, Y_train)
+                # print X_train[0]
+                # print Y_train[0]
+                # print Y_ids[0]
+                #
+                # print nn_model.decoding(X_train, Y_train)
+                # print nn_model.slicing(X_train, Y_train)
 
-            loss = nn_model.train(Y_train, Y_train, Y_ids)
-            loss_history.append((time.time(), loss))
+                loss = nn_model.train(Y_train, Y_train, Y_ids)
+                loss_history.append((time.time(), loss))
 
-            progress = float(batch_id) / batches_num * 100
-            avr_time_per_sample = (time.time() - start_time) / batch_id
-            expected_time_per_epoch = avr_time_per_sample * batches_num
+                progress = float(batch_id) / batches_num * 100
+                avr_time_per_sample = (time.time() - start_time) / batch_id
+                expected_time_per_epoch = avr_time_per_sample * batches_num
 
-            print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
-                  % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
+                print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
+                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
-            if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
-                print '\n', datetime.datetime.now().time()
-                print NN_MODEL_PARAMS_STR, '\n'
+                if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
+                    print '\n', datetime.datetime.now().time()
+                    print NN_MODEL_PARAMS_STR, '\n'
 
-                for sent in test_dataset:
-                    prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
-                    print '%-35s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
+                    for sent in test_dataset:
+                        prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
+                        print '%-35s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
 
-                print '\n'
+                    print '\n'
 
-            if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
-                plot_loss(loss_history)
+                if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
+                    plot_loss(loss_history)
 
-                save_model(nn_model)
+                    save_model(nn_model)
 
-                update_perplexity_stamps(perplexity_stamps['validation'], nn_model, validation_lines, w2v_model,
-                                         index_to_token, start_time)
+                    update_perplexity_stamps(perplexity_stamps['validation'], nn_model, validation_lines, w2v_model,
+                                             index_to_token, start_time)
 
-                train_lines_subset = random.sample(all_train_lines, len(validation_lines))
-                update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_lines_subset, w2v_model,
-                                         index_to_token, start_time)
+                    train_lines_subset = random.sample(all_train_lines, len(validation_lines))
+                    update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_lines_subset, w2v_model,
+                                             index_to_token, start_time)
 
-                save_test_results(nn_model, w2v_model, index_to_token, start_time, batch_id, batches_num,
-                                  perplexity_stamps)
-            batch_id += 1
+                    save_test_results(nn_model, w2v_model, index_to_token, start_time, batch_id, batches_num,
+                                      perplexity_stamps)
+                batch_id += 1
+
     except (KeyboardInterrupt, SystemExit):
         _logger.info('Training cycle is stopped manually')
         _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
