@@ -68,7 +68,7 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
                 Y[s_index, t_index] = get_token_vector(token, w2v_model)
                 Y_ids[s_index, t_index] = token_to_index[token]
 
-        X = np.fliplr(X)  # reverse inputs
+        # X = np.fliplr(X)  # reverse inputs
 
         # print sents_batch[0]
         # print sents_batch[1]
@@ -107,7 +107,6 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
     try:
         for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
-            _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
             lines_for_train, saved_iterator = tee(saved_iterator)
 
             for X_train, Y_train, Y_ids in get_training_batch(w2v_model, lines_for_train, token_to_index):
@@ -120,7 +119,9 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                 # print nn_model.slicing(X_train, Y_train)
 
                 loss = nn_model.train(Y_train, Y_train, Y_ids)
-                loss_history.append((time.time(), loss))
+
+                elapsed_hours = (time.time() - start_time) / (60 * 60)
+                loss_history.append((elapsed_hours, loss))
 
                 progress = float(batch_id) / batches_num * 100
                 avr_time_per_sample = (time.time() - start_time) / batch_id

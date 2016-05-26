@@ -169,7 +169,7 @@ def plot_loss(loss_stamps):
     # create subplot grid with 1 row, 1 column and add the current subplot to the first position
     ax = fig.add_subplot(111)
     ax.set_xlabel('hours elapsed')
-    ax.set_ylabel('perplexity')
+    ax.set_ylabel('loss')
     recent_stamps_num = 100
     recent_avr_num = 10
 
