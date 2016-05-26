@@ -35,7 +35,7 @@ class Repeat(lasagne.layers.Layer):
 class Lasagne_Seq2seq:
     def __init__(self, vocab_size):
         self.vocab_size = vocab_size
-        self.net = self._get_dropout_net()
+        self.net = self._get_net()
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
         self.encode = self._get_encoder_fun()

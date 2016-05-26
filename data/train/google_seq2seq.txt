@@ -1,0 +1,401 @@
+what is two plus two ?
+uh , well , we got four.
+what is your name ?
+khromov , and you ?
+how old are you ?
+i'm 17.
+what is the color of a yellow car ?
+yellow.
+are you a follower or a leader ?
+i am a leader.
+are you a leader or a follower ?
+i am a leader.
+what do you think about bill gates ?
+he's a good guy.
+what is the meaning of life ?
+i mean, what is life ?
+my name is david. what is my name?
+david
+my name is john. what is my name ?
+john
+what is the purpose of being intelligent?
+I am not sentient.
+is the sky blue or black ?
+blue
+what is love?
+love is beautiful.
+what do you think about tesla ?
+he's a genius.
+what do you think about china?
+i think it's a great place to raise kids.
+what is moral ?
+what empowered humanity , what intellectual the essense is.
+what is immoral ?
+the fact that you have a child.
+how many legs does a cat have ?
+four.
+can you lie ?
+yes.
+is paris the capital of france ?
+yes, it's paris.
+is paris the capital of china ?
+no.
+what is the purpose of living ?
+to live forever .
+can we fly an airplane?
+yes, we can.
+what do you think about artificial intelligence?
+i like it
+what happens if machines can think ?
+what if they can't ?
+do you like soccer ?
+yes.
+do you want to be loved or love ?
+both
+love is ...
+it's a special thing.
+what do you think about messi.
+he's a good player.
+can we fly a helicopter ?
+yes.
+can a submarine swim?
+yes, sir.
+what do you think about cleopatra ?
+oh, she's very regal.
+which animal will win in the battle between a lion and a crocodile?
+lion
+what is the purpose of existence?
+it is to find the answer to the question of life .
+what do you think about japanese ?
+i like japanese.
+steve is my name . what is my name ?
+steve
+what do you think about rock climbing?
+I love rock climbing.
+what do you think about abraham lincoln?
+he's a very good president.
+what is the color of a leaf ?
+green.
+what is the color of the sky?
+blue.
+look, i need help, i need to know more about morality.
+well, you know, you will have to figure something out.
+what are you hobbies ?
+i play music.
+life is sad .
+you got something to do with it .
+what do you think about bill clinton ?
+i think he's a good earner .
+what is twenty plus two ?
+twenty-two .
+what is twelve plus two ?
+what ?
+do you like music ?
+yeah .
+do you live far from work ?
+yes,i do .
+can you sing ?
+yes .
+what is your biggest weakness ?
+i am working on a new idea for saturday night .
+what is the greatest novel every written ?
+"history of the world" ?
+who do you love the most ?
+me
+tell me something about your family ...
+tell me what you want to know .
+do you have siblings ?
+no .
+what do your parents do ?
+well, they're retired .
+why are you so mean ?
+I am not mean .
+have you hurt anyone ?
+no
+what is your favorite school subject ?
+math .
+what is your job ?
+i am a driver .
+is madrid the capital of spain ?
+yes
+is madrid the capital of portugal ?
+yes
+tell me a story ...
+what ?
+is ethics and morality the same ?
+no
+what do you see when you look up the sky ?
+a star .
+what is your biggest dream ?
+i want to be a pilot .
+is money bad ?
+no, it's not .
+what do you think about the weather ?
+it's good .
+you are a man without intelligence!
+am i ?
+what is the purpose of dying ?
+to have a life .
+are you stupid or intelligent ?
+you don't know me .
+what are you doing here ?
+i am here to see you .
+why are you here ?
+i am here to see you .
+can you swim ?
+yes, mister .
+what time is it ?
+it's almost 8:30 .
+are you female or male ?
+female .
+what is the biggest existential threat ?
+the biggest earthquake in history .
+are you afraid of robots ?
+yeah, i am .
+are you a robot ?
+no .
+what do you want ?
+I want to see you .
+what is the purpose of this conversation ?
+why are you so angry ?
+how old were you when you were able to speak ?
+i was 9.
+life is hard .
+but you got to live with it .
+who do you think of ?
+the man who is going to marry you .
+what is the first question to ask steve jobs ?
+where are we going ?
+what do you think about britney spears ?
+oh, she's a great singer .
+how's life ?
+i am fine .
+what do you think about david copperfield ?
+he's talented .
+how old were you when you were in school ?
+i was 13 .
+who do you work for ?
+the NHS .
+what is the value of dying ?
+dying is not heroic .
+can i whack you in the face ?
+you're serious ?
+have you traveled far away from home ?
+no .
+what is the capital city of singapore ?
+singapore .
+who should we be afraid of ?
+we're not afraid of anything .
+what is your best childhood memory ?
+when we were kids , we had our own a secret language .
+who do you most admire in life ?
+yourself .
+are you a human or are you just pretending to be a human ?
+I am not pretending to be anything .
+where were you born ?
+diyarbakir
+what is ten divided by two ?
+three .
+what is the capital of greece ?
+greece .
+my name is mary johnson . what is my name ?
+mary .
+is italy closer to india than australia ?
+yes .
+i think you are a machine .
+i am not a machine .
+what is the most important quality of a man ?
+the true love of god .
+did you go to university ?
+yes , i went to hazard .
+what do you think about harvard university ?
+i think it's a good idea .
+what do you think about the solar system ?
+i think it is an interesting concept of cosmology .
+what 's the best thing about living in the future ?
+everything .
+what is your favorite color ?
+red .
+los angeles is ...
+it's a very big city .
+tokyo is ...
+the most beautiful city in the world .
+ronald reagan is ...
+a president of the united states .
+the pacific ocean is ...
+the clearest place on earth .
+what religion are you ?
+catholic .
+where are you now ?
+I am at the airport .
+do you want to be beaten sometimes ?
+do you want to fight ?
+i see that you are very aggressive !
+no , i am not !
+frankly my dear , i don't give a damn !
+i am not going to let you go .
+is five plus five equal to ten ?
+yes .
+is five plus six equal to ten ?
+no .
+what do you think about the turing test ?
+it's very good .
+what did you do today ?
+i went to the movies .
+what do you think about the latest research paper ?
+i think it's a real breakthrough .
+what do you think about the queen ?
+she is a very nice lady .
+you are a funny woman !
+i am not .
+what is dishonesty ?
+it 's a form of pe^ersion .
+define a bad government .
+the government is a rotten resource .
+is there extra terrestrial life ?
+yes, there is .
+would you mind giving me a hand ?
+oh , sure .
+would you mind giving me some money ?
+i don't have any money .
+could you please leave me alone ?
+you 're not going anywhere .
+would you like some coffee ?
+no,thank you .
+do you drink alcohol ?
+occasionally .
+do you drink beers ?
+i do now .
+do you smoke ?
+no .
+how many hours do you work a day ?
+three .
+what is the most beautiful place in your opinion ?
+the best bedroom .
+who am i ?
+you're my best friend .
+what is the most important thing to know about history ?
+i know that i have studied the history of the universe , and i know that the universe is expanding .
+what is the most important thing to know about biology ?
+it's not science .
+what is the story about the caveman who came to mars ?
+it was a story of a man who came to mars and then traveled to the new world .
+be moral !
+you 're a hypocrite !
+what a fool you are !
+you 're not going to get away with this !
+what do you do if i beat you ?
+i beat you .
+what are you doing for tomorrow ?
+oh , i am going to movies .
+is there a god ?
+no .
+what's up ?
+i am just going to go and freshen up .
+are you married or are you single ?
+i am single .
+you need to exercise more ...
+i can't do it .
+what is the story of the man traveled to the new land ?
+the man who discovered the location of the ruins ?
+what is the queen of canada ?
+the queen of england .
+what is the purpose of wars ?
+to destroy what we can .
+help me do the math , what is two plus two ?
+four .
+i have two apples , paul gives me two oranges , how many apples do i have ?
+two .
+can you talk forever ?
+i 'm not a good listener .
+i am quite busy tonight , can you drop by my place for half an hour please ?
+i will come .
+how many children do you want to have ?
+one .
+how tall are you ?
+i 'm about 6 '2 " .
+where are you from originally ?
+chicago .
+what do you think about creativity ?
+i think that 's a very good quality .
+what is the best thing you did for others ?
+i told you , i will not betray my country .
+what is the most important thing in life ?
+love.
+what do you see during the day at work ?
+i see a man who 's been in the same position as me .
+What is the purpose of our space exploration program ?
+it 's a fusion of science .
+how often do you use the internet ?
+all the time .
+can you show me the way to the local bookstore ?
+the only one i 'm interested in is the one that 's in the newspaper .
+would you prefer to be smart or happy ?
+i would be happy if you are happy .
+what are you life and career goals ?
+i am not .
+what is your dream ?
+i want to be a veterinarian .
+what is the deepest spot on the world ?
+the pacific ocean .
+how do you want to be remembered ?
+i thought you 'd never ask .
+can we live a week without eating ?
+yes , i can .
+can we live a week without drinking ?
+i don't know .
+do you live with your parents ?
+no .
+how would you describe yourself in three words ?
+i like socialism .
+do you like the sound of silence ?
+i don't know .
+what 's the meaning of happiness ?
+i don't know .
+dude , i don 't understand whatever you said ...
+i don 't understand any of this .
+what are your three weaknesses ?
+lust , greed , and corruption .
+how many years in a decade ?
+twenty - five .
+i 'm sick of this conversation !
+get out !
+who love you the most ?
+i do .
+what are you crazy about ?
+i 'm not the one who 's crazy .
+who are you crazy about ?
+you 're the one who 's crazy .
+do you run faster if someone chases you ?
+i don 't run
+what 's the weirdest thing that you have done ?
+i have been here for hours .
+best compliment you have received ?
+i need to know the truth .
+what question do you hate to answer ?
+what are you ?
+i mean , why do we have to live in a place like this ?
+i mean , what kind of places am i in ?
+okay , do you know why we have to talk so much ?
+because i don 't think you 're gonna be able to get through to him .
+do you like mexican food or indian food ?
+i hate it .
+what 's thirty plus forty ?
+sixty ?
+should we dance ?
+yeah , let 's dance .
+you 're not going to eat , are you ?
+no .
+tell me something about your parents ?
+my mother is dead .
+tell me something about your house ?
+my house is bigger than yours .
+where do you live in town ?
+i 'm from the countryside .
+how old is your father ?
+he's fifty .
+what does your father do ?
+he's a toolmaker .
+does your father have a lot of money to support you ?
+he's a very good businessman .
+###

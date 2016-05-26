@@ -82,7 +82,11 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
         next_token_id, next_token_prob = _sample(curr_token_prob_dist, temperature)
 
         # for d in probs_batch:
-        #     next_token_id, next_token_prob = _sample(curr_token_prob_dist, temperature)
+        #     next_token_id, next_token_prob = _sample(d, temperature)
+        #     next_token = index_to_token[next_token_id]
+        #     print next_token,
+        #
+        # print
 
 
         next_token = index_to_token[next_token_id]

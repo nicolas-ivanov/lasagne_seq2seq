@@ -57,7 +57,7 @@ def get_training_batch(w2v_model, tokenized_dialog, token_to_index):
         Y = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH, TOKEN_REPRESENTATION_SIZE), dtype=np.float32)
         Y_ids = np.zeros((len(sents_batch), ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
 
-        for s_index, sentence in enumerate(sents_batch):
+        for s_index in xrange(0, len(sents_batch), 2):
             if s_index == len(sents_batch) - 1:
                 break
 
