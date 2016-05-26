@@ -270,7 +270,7 @@ class Lasagne_Seq2seq:
         all_params = get_all_params(self.net['l_dist'], trainable=True)
 
         print("Computing train updates...")
-        updates = lasagne.updates.rmsprop(
+        updates = lasagne.updates.adadelta(
             loss_or_grads=cost,
             params=all_params,
             learning_rate=LEARNING_RATE

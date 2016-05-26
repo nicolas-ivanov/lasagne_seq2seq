@@ -131,7 +131,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
-                        print '%-50s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
+                        print '%-35s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
 
                     print '\n'
 

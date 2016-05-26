@@ -50,9 +50,9 @@ W2V_PARAMS = {
 GRAD_CLIP = 100.
 LEARNING_RATE = 0.05       # hm, what learning rate should be here?
 NN_LAYERS_NUM = 1
-DROPOUT_RATE = 0.
+DROPOUT_RATE = 0.5
 DEFAULT_TEMPERATURE = 0.7
-TEMPERATURE_VALUES = [0.3, 0.5, 0.8]
+TEMPERATURE_VALUES = [0.3, 0.5, 0.8, 1.2]
 
 def get_nn_params_str():
     params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_bs{batch_size}'
