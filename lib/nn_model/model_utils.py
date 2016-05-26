@@ -113,8 +113,10 @@ def plot_perplexities(perplexity_stamps):
     training_perplexity_values = [stamp[1] for stamp in perplexity_stamps['training']]
 
     ax.grid(True)
-    ax.plot(validation_time_values[-recent_stamps_num:], validation_perplexity_values[-recent_stamps_num:], 'b-o',
-            training_time_values[-recent_stamps_num:], training_perplexity_values[-recent_stamps_num:], 'r-o')
+    ax.plot(validation_time_values[-recent_stamps_num:], validation_perplexity_values[-recent_stamps_num:],
+            'b-o',label='perplexity on validation set')
+    ax.plot(training_time_values[-recent_stamps_num:], training_perplexity_values[-recent_stamps_num:],
+            'r-o', label='perplexity on training set')
 
     recent_perplexity = validation_perplexity_values[-recent_perplexity_num:]
     y_mean = np.mean(recent_perplexity)

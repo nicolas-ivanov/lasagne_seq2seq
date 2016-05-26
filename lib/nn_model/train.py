@@ -126,8 +126,8 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                       % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
-                    print '\n%s\n' % datetime.datetime.now().time()
-                    print NN_MODEL_PARAMS_STR
+                    print '\n', datetime.datetime.now().time()
+                    print NN_MODEL_PARAMS_STR, '\n'
 
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)
