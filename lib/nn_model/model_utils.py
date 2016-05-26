@@ -15,7 +15,7 @@ from lib.nn_model.predict import get_nn_response, get_responses_for_temperatures
 from utils.utils import get_formatted_time, get_git_revision_short_hash, get_logger
 from configs.config import RUN_DATE, TEST_DATASET_PATH, DEFAULT_TEMPERATURE, \
     TEST_RESULTS_PATH, BIG_TEST_RESULTS_PATH, PERPLEXITY_LOG_PATH, PERPLEXITY_PIC_PATH, NN_MODEL_PARAMS_STR, \
-    TEMPERATURE_VALUES, SMALL_TEST_DATASET_SIZE
+    TEMPERATURE_VALUES, SMALL_TEST_DATASET_SIZE, LOSS_LOG_PATH, LOSS_PIC_PATH
 
 _logger = get_logger(__name__)
 
@@ -117,6 +117,7 @@ def plot_perplexities(perplexity_stamps):
             'b-o',label='perplexity on validation set')
     ax.plot(training_time_values[-recent_stamps_num:], training_perplexity_values[-recent_stamps_num:],
             'r-o', label='perplexity on training set')
+    ax.legend()
 
     recent_perplexity = validation_perplexity_values[-recent_perplexity_num:]
     y_mean = np.mean(recent_perplexity)
@@ -158,3 +159,34 @@ def save_test_results(nn_model, w2v_model, index_to_token, start_time, current_b
 
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
     _log_predictions_with_temperatures(small_test_dataset, nn_model, w2v_model, index_to_token, stats_info)
+
+
+
+def plot_loss(loss_stamps):
+    fig = pyplot.figure()
+    fig.suptitle(NN_MODEL_PARAMS_STR)
+
+    # create subplot grid with 1 row, 1 column and add the current subplot to the first position
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('hours elapsed')
+    ax.set_ylabel('perplexity')
+    recent_stamps_num = 100
+    recent_avr_num = 10
+
+    time_values = [stamp[0] for stamp in loss_stamps]
+    loss_values = [stamp[1] for stamp in loss_stamps]
+
+    ax.grid(True)
+    ax.plot(time_values[-recent_stamps_num:], loss_values[-recent_stamps_num:], 'b-o',label='training loss')
+    ax.legend()
+
+    recent_perplexity = loss_values[-recent_avr_num:]
+    y_mean = np.mean(recent_perplexity)
+    ax.axhline(y_mean)
+    fig.savefig(LOSS_PIC_PATH)
+
+    # also save this data in text format
+    with codecs.open(LOSS_LOG_PATH + '.csv', 'w', 'utf-8') as loss_fh:
+        vals = [[t, l] for (t, l) in zip(time_values, loss_values)]
+        csv_writer = csv.writer(loss_fh)
+        csv_writer.writerows(vals)

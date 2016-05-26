@@ -16,7 +16,7 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'small_testset.txt')
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 128
-VOCAB_MAX_SIZE = 22000
+VOCAB_MAX_SIZE = 1000
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 512
@@ -24,11 +24,11 @@ INPUT_SEQUENCE_LENGTH = 15
 ANSWER_MAX_TOKEN_LENGTH = 12
 
 # set training params
-TRAIN_BATCH_SIZE = 512
+TRAIN_BATCH_SIZE = 5
 SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
 SMALL_TEST_DATASET_SIZE = 10
-TEST_PREDICTIONS_FREQUENCY = 50
-BIG_TEST_PREDICTIONS_FREQUENCY = 1000
+TEST_PREDICTIONS_FREQUENCY = 1
+BIG_TEST_PREDICTIONS_FREQUENCY = 1
 FULL_LEARN_ITER_NUM = 5000
 
 # local paths and strs that depend on previous params
@@ -79,6 +79,8 @@ TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'res' + RUN_DATE + NN_MOD
 BIG_TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'big_res' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
 PERPLEXITY_PIC_PATH = os.path.join(DATA_PATH, 'perplexity', 'perplexity' + RUN_DATE + NN_MODEL_PARAMS_STR + '.png')
 PERPLEXITY_LOG_PATH = os.path.join(DATA_PATH, 'perplexity', 'perplexity' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
+LOSS_PIC_PATH = os.path.join(DATA_PATH, 'perplexity', 'loss' + RUN_DATE + NN_MODEL_PARAMS_STR + '.png')
+LOSS_LOG_PATH = os.path.join(DATA_PATH, 'perplexity', 'loss' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
 DIALOGS_TEST_RESULTS_PATH = os.path.join(DATA_PATH, 'results', 'dialogs_res_' + RUN_DATE + NN_MODEL_PARAMS_STR + '.csv')
 
 NN_MODEL_PATH = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_PARAMS_STR)

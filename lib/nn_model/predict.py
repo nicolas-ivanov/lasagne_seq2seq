@@ -73,10 +73,17 @@ def _predict_sequence(input_sequence, nn_model, w2v_model, index_to_token, tempe
     while next_token != EOS_SYMBOL and len(response) < ANSWER_MAX_TOKEN_LENGTH-1:
         probs_batch = nn_model.predict(x_batch, curr_y_batch)
 
+        # print probs_batch.shape
+        # print probs_batch
+
         # probs_batch has shape (batch_size * seq_len, vocab_size)
         # we only need the last prediction, so take it
         curr_token_prob_dist = probs_batch[i]
         next_token_id, next_token_prob = _sample(curr_token_prob_dist, temperature)
+
+        # for d in probs_batch:
+        #     next_token_id, next_token_prob = _sample(curr_token_prob_dist, temperature)
+
 
         next_token = index_to_token[next_token_id]
         response.append(next_token)
