@@ -9,7 +9,7 @@ import numpy as np
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
-    SMALL_TEST_DATASET_SIZE, TOKEN_REPRESENTATION_SIZE
+    SMALL_TEST_DATASET_SIZE, TOKEN_REPRESENTATION_SIZE, NN_MODEL_PARAMS_STR
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset
 from lib.nn_model.predict import get_nn_response
 from lib.w2v_model.vectorizer import get_token_vector
@@ -127,6 +127,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 0:
                     print '\n%s\n' % datetime.datetime.now().time()
+                    print NN_MODEL_PARAMS_STR
 
                     for sent in test_dataset:
                         prediction, perplexity = get_nn_response(sent, nn_model, w2v_model, index_to_token)

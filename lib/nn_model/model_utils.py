@@ -68,8 +68,7 @@ def _log_predictions_with_temperatures(sentences, nn_model, w2v_model, index_to_
 
         for sent in sentences:
             predictions, perplexities = get_responses_for_temperatures(sent, nn_model, w2v_model, index_to_token)
-            tokenized_sent = get_input_sequence(sent)
-            csv_writer.writerow(['', tokenized_sent] + predictions + perplexities)
+            csv_writer.writerow(['', sent] + predictions + perplexities)
 
 
 def compute_avr_perplexity(nn_model, validation_sents, w2v_model, index_to_token):
