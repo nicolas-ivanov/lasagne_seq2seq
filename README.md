@@ -15,8 +15,8 @@ The code includes:
 
 **Setup&Run**
 
-    git clone https://github.com/nicolas-ivanov/debug_seq2seq
-    cd debug_seq2seq
+    git clone https://github.com/nicolas-ivanov/lasagne_seq2seq.git
+    cd lasagne_seq2seq
     bash bin/setup.sh
     python bin/train.py
 
@@ -30,7 +30,7 @@ and then
 (without feeding)
 
 
-![seq2seq v1](pics/seq2seq_v1_blank.png)
+![seq2seq v1](pics/seq2seq_v1_tiny.png)
 
 
 
@@ -48,7 +48,7 @@ Results:
     is the sky blue or black ?	                 →  it ' s a little ### .
     what is love?	                             →  i ' m sorry .
     what do you think about tesla ?	             →  i ' m so what you ' re going to know
-    what do you think about china?	             →  → i don ' t know .
+    what do you think about china?	             →  i don ' t know .
 
 Params:
 
@@ -63,7 +63,7 @@ Params:
 
 (with feeding)
 
-![seq2seq v2](pics/seq2seq_v2_blank.png)
+![seq2seq v2](pics/seq2seq_v2_tiny.png)
 
 
 Results:
