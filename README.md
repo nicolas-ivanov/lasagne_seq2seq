@@ -1,5 +1,5 @@
 # lasange seq2seq
-An attempt to implement Sequence to sequence architecture on Lasagne.
+An attempt to implement Sequence to sequence architecture on Lasagne. Since it doesn't produce awesome results so far, also consider other implementations of [seq2seq](https://github.com/nicolas-ivanov/nn_chatbot_links).
 
 The code includes:
 
@@ -113,6 +113,6 @@ For the same reason it might be better to use pre-trained word embeddings than t
 [\[2\] A Neural Conversational Model][2]
 [\[3\] A Survey of Available Corpora For Building Data-Driven Dialogue Systems][3]
 
-[1]: http://papers.nips.cc/paper/5346-sequence-to-sequence-learning-with-neural-networks.pdf
-[2]: http://arxiv.org/pdf/1506.05869v1.pdf
-[3]: http://arxiv.org/pdf/1512.05742v2.pdf
+* [1]: http://papers.nips.cc/paper/5346-sequence-to-sequence-learning-with-neural-networks.pdf
+* [2]: http://arxiv.org/pdf/1506.05869v1.pdf
+* [3]: http://arxiv.org/pdf/1512.05742v2.pdf
