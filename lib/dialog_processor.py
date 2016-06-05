@@ -31,7 +31,7 @@ def get_tokens_voc(tokenized_dialog_lines):
             token_counter.update([token])
 
     freq_tokens = [token for token, _ in token_counter.most_common()[:VOCAB_MAX_SIZE-2]]
-    token_voc = [PAD_TOKEN, EMPTY_TOKEN] + freq_tokens
+    token_voc = [PAD_TOKEN, EMPTY_TOKEN] + freq_tokens   # PAD_TOKEN should have id = 0
 
     return token_voc
 

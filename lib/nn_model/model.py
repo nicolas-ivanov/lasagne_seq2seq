@@ -35,15 +35,15 @@ class Repeat(lasagne.layers.Layer):
 class Lasagne_Seq2seq:
     def __init__(self, vocab_size):
         self.vocab_size = vocab_size
-        self.net = self._get_net()                  # seq2seq v1
-        # self.net = self._get_concat_net()           # seq2seq v2
+        # self.net = self._get_net()                  # seq2seq v1
+        self.net = self._get_concat_net()           # seq2seq v2
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
-        self.encode = self._get_encoder_fun()
-        self.decode = self._get_decoder_fun()
-        self.embedding = self._get_embedding_fun()
-        self.slicing = self._get_slice_fun()
-        self.decoding = self._get_dec_fun()
+        # self.encode = self._get_encoder_fun()
+        # self.decode = self._get_decoder_fun()
+        # self.embedding = self._get_embedding_fun()
+        # self.slicing = self._get_slice_fun()
+        # self.decoding = self._get_dec_fun()
 
     def _get_net(self):
         net = OrderedDict()
@@ -91,7 +91,7 @@ class Lasagne_Seq2seq:
 
         net['l_dec_long'] = ReshapeLayer(
             incoming=net['l_slice'],
-            shape=(-1, HIDDEN_LAYER_DIMENSION),  # reshape the layer so that we ca
+            shape=(-1, HIDDEN_LAYER_DIMENSION),
             name='reshape_layer'
         )
 
@@ -291,7 +291,7 @@ class Lasagne_Seq2seq:
         net['l_dec'] = LSTMLayer(
             incoming=net['l_concat'],
             num_units=HIDDEN_LAYER_DIMENSION,
-            hid_init=net['l_enc'],
+            # hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
             name='lstm_decoder'
         )
@@ -312,7 +312,7 @@ class Lasagne_Seq2seq:
 
         net['l_dec_long'] = ReshapeLayer(
             incoming=net['l_slice'],
-            shape=(-1, HIDDEN_LAYER_DIMENSION),     # reshape the layer so that we ca
+            shape=(-1, HIDDEN_LAYER_DIMENSION),
             name='reshape_layer'
         )
 

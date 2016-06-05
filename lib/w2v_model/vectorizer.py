@@ -1,10 +1,13 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE
-from lib.dialog_processor import EMPTY_TOKEN
+from lib.dialog_processor import EMPTY_TOKEN, PAD_TOKEN
 
 
 def get_token_vector(token, model):
+    if token is PAD_TOKEN:
+        return np.zeros(TOKEN_REPRESENTATION_SIZE, dtype=np.float32)
+
     if token in model.vocab:
         return np.array(model[token])
 
