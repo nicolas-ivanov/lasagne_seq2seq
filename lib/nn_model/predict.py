@@ -8,14 +8,13 @@ from utils.utils import get_logger
 
 _logger = get_logger(__name__)
 
-
 def _sample(probs, temperature=1.0):
     """
     helper function to sample an index from a probability array
     """
     strethced_probs = np.log(probs) / temperature
     strethced_probs = np.exp(strethced_probs) / np.sum(np.exp(strethced_probs))
-    idx = np.random.choice(np.arange(VOCAB_MAX_SIZE), p=strethced_probs)
+    idx = np.random.choice(strethced_probs.shape[0], p=strethced_probs)
     idx_prob = strethced_probs[idx]
     return idx, idx_prob
 

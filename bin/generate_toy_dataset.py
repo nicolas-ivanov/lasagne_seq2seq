@@ -15,16 +15,21 @@ def get_unique_word_list(filename):
     return words_list
 
 
-def generate_repeated_phrases(output_filename, words_list, n_lines=10000, n_words_in_line=3):
+def create_dataset(output_filename, words_list, n_lines=10000, n_words_in_line=3, same_words=False, reversed_output=False):
     with open(output_filename, 'w') as f:
         for i in xrange(n_lines):
-            word = np.random.choice(words_list)
-            line_to_use = ' '.join([word] * n_words_in_line)
-            f.write(line_to_use + '\n')
-            f.write(line_to_use + '\n')
+            if same_words:
+                words = np.random.choice(words_list, size=n_words_in_line)
+            else:
+                words = [np.random.choice(words_list)] * n_words_in_line
+            line_to_use = ' '.join(words) + '\n'
+            f.write(line_to_use)
+            if reversed_output:
+                line_to_use = ' '.join(reversed(words)) + '\n'
+            f.write(line_to_use)
 
 
 if __name__ == '__main__':
     words_list = get_unique_word_list('data/train/movie_lines_cleaned_10k.txt')
-    generate_repeated_phrases('data/train/repeated_phrases.txt', words_list)
-    generate_repeated_phrases('data/test/repeated_phrases.txt', words_list, n_lines=50)
+    create_dataset('data/train/repeated_phrases.txt', words_list)
+    create_dataset('data/test/repeated_phrases.txt', words_list, n_lines=50)
