@@ -7,16 +7,18 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'movie_lines_cleaned'
+CORPUS_NAME = 'repeated_phrases'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
-TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
-SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'small_testset.txt')
+TEST_DATASET_PATH = os.path.join('data', 'test', 'repeated_phrases.txt')
+SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'repeated_phrases.txt')
 
 # set word2vec params
-TOKEN_REPRESENTATION_SIZE = 128
+TOKEN_REPRESENTATION_SIZE = 200
 VOCAB_MAX_SIZE = 22000
+USE_PRETRAINED = True
+GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 512
@@ -37,6 +39,8 @@ PROCESSED_CORPUS_PATH = os.path.join(DATA_PATH, PROCESSED_CORPORA_DIR, CORPUS_NA
 
 # w2v params that depend on previous params
 W2V_PARAMS = {
+    "use_pretrained": USE_PRETRAINED,
+    "txt_path": GLOVE_MODEL_PATH,
     "corpus_name": CORPUS_NAME,
     "save_path": DATA_PATH,
     "pre_corpora_dir": CORPORA_DIR,
