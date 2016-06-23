@@ -18,7 +18,7 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'repeated_phrases.txt')
 TOKEN_REPRESENTATION_SIZE = 200
 VOCAB_MAX_SIZE = 22000
 USE_PRETRAINED = True
-GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt'
+GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 512

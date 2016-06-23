@@ -18,7 +18,8 @@ def _train_model(tokenized_lines, params):
 
     tokenized_lines_for_voc, tokenized_lines_for_train = tee(tokenized_lines)
 
-    model = Word2Vec(window=int(params['win_size']), max_vocab_size=int(params['vocab_size']), size=int(params['vect_size']),
+    model = Word2Vec(window=int(params['win_size']), max_vocab_size=int(params['vocab_size']),
+                     size=int(params['vect_size']),
                      workers=int(params['workers_num']))
     model.build_vocab(tokenized_lines_for_voc)
     model.train(tokenized_lines_for_train)
@@ -37,6 +38,7 @@ def load_model(full_bin_name):
     _logger.info('Model "%s" has been loaded.' % os.path.basename(full_bin_name))
     return model
 
+
 def load_model_from_txt(full_txt_name):
     _logger.info('Loading model from pretrained model %s' % full_txt_name)
     model = dict()
@@ -50,6 +52,14 @@ def load_model_from_txt(full_txt_name):
     return model
 
 
+class FakeW2VModel:
+    # Dirty hack. Class pretends to be a Word2Vec model with vocab
+    def __init__(self, vocab):
+        self.vocab = vocab
+
+    def __getitem__(self, item):
+        return self.vocab[item]
+
 
 def get_dialogs_model(params, tokenized_lines):
     params_str = '_w' + str(params['win_size']) + '_v' + str(params['vocab_size']) + '_v' + str(params['vect_size'])
@@ -57,7 +67,7 @@ def get_dialogs_model(params, tokenized_lines):
     full_bin_name = os.path.join(params['save_path'], params['new_models_dir'], model_name)
 
     if params['use_pretrained']:
-        model = load_model_from_txt(params['txt_path'])
+        model = FakeW2VModel(load_model_from_txt(params['txt_path']))
     elif not os.path.isfile(full_bin_name):
         # bin model is not present on the disk, so get it
         model = _train_model(tokenized_lines, params)
