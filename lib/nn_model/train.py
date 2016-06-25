@@ -112,7 +112,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                     update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_ids_subset,
                                              index_to_token, start_time)
 
-                    save_test_results(nn_model, index_to_token, start_time, batch_id, batches_num,
+                    save_test_results(nn_model, index_to_token, token_to_index, start_time, batch_id, batches_num,
                                       perplexity_stamps)
                 batch_id += 1
 
