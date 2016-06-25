@@ -5,10 +5,11 @@ from collections import OrderedDict
 import lasagne
 import theano
 import theano.tensor as T
-from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, \
+from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, EmbeddingLayer, \
     get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer, \
     ConcatLayer, DropoutLayer
 from lasagne.objectives import categorical_crossentropy
+from lasagne.init import Normal
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
     ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE
@@ -33,8 +34,9 @@ class Repeat(lasagne.layers.Layer):
 
 
 class Lasagne_Seq2seq:
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, init_embedding=Normal()):
         self.vocab_size = vocab_size
+        self.W = init_embedding
         self.net = self._get_net()                  # seq2seq v1
         # self.net = self._get_concat_net()           # seq2seq v2
         self.train = self._get_train_fun()
@@ -48,17 +50,31 @@ class Lasagne_Seq2seq:
     def _get_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="enc_ix"),
+        net['l_in_x'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="dec_ix"),
+        net['l_in_y'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
+
+        net['l_emb_x'] = EmbeddingLayer(
+            incoming=net['l_in_x'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        net['l_emb_y'] = EmbeddingLayer(
+            incoming=net['l_in_y'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
 
         # encoder ###############################################
         net['l_enc'] = LSTMLayer(
-            incoming=net['l_in_x'],
+            incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
             only_return_final=True,
@@ -68,7 +84,7 @@ class Lasagne_Seq2seq:
         # decoder ###############################################
 
         net['l_dec'] = LSTMLayer(
-            incoming=net['l_in_y'],
+            incoming=net['l_emb_y'],
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
@@ -331,10 +347,10 @@ class Lasagne_Seq2seq:
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])   # "long" 2d matrix with prob distribution
 
-        input_ids = T.imatrix()
         # cut off the first ids from every id sequence: they correspond to START_TOKEN, that we are not predicting
-        target_ids = input_ids[:, 1:]
+        target_ids = self.net['l_in_y'].input_var[:, 1:]
         target_ids_flattened = target_ids.flatten()               # "long" vector with target ids
+
 
         cost = categorical_crossentropy(
             predictions=output_probs,
@@ -352,7 +368,7 @@ class Lasagne_Seq2seq:
 
         print("Compiling train function...")
         train_fun = theano.function(
-            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var, input_ids],
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
             outputs=cost,
             updates=updates
         )
@@ -511,13 +527,13 @@ class Lasagne_Seq2seq:
         print '\n', '-'*100
 
 
-def get_nn_model(vocab_size):
+def get_nn_model(vocab_size, w2v_matrix):
     _logger.info('Initializing NN model with the following params:')
     _logger.info('NN input dimension: %s (token vector size)' % TOKEN_REPRESENTATION_SIZE)
     _logger.info('NN hidden dimension: %s' % HIDDEN_LAYER_DIMENSION)
     _logger.info('NN output dimension: %s (dict size)' % vocab_size)
 
-    model = Lasagne_Seq2seq(vocab_size)
+    model = Lasagne_Seq2seq(vocab_size, w2v_matrix)
 
     if os.path.isfile(NN_MODEL_PATH):
         _logger.info('Loading previously calculated weights...')
