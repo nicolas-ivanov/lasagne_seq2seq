@@ -91,7 +91,7 @@ def _log_predictions_with_temperatures(sentences, sentences_ids, nn_model, index
         csv_writer.writerow(head_row)
 
         for sent, sent_ids in zip(sentences, sentences_ids):
-            predictions, perplexities = get_responses_for_temperatures(sent, nn_model, index_to_token)
+            predictions, perplexities = get_responses_for_temperatures(sent_ids, nn_model, index_to_token)
             csv_writer.writerow(['', sent] + predictions + perplexities)
 
 
