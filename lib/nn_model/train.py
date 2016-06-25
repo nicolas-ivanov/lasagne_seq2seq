@@ -94,7 +94,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
                     print NN_MODEL_PARAMS_STR, '\n'
 
                     for i, sent in enumerate(test_dataset):
-                        prediction, perplexity = get_nn_response(x_test[i], nn_model, token_to_index, index_to_token)
+                        prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token)
                         print '%-35s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
 
                     print '\n'
