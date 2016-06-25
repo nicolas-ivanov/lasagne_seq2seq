@@ -34,7 +34,7 @@ def learn():
     nn_model = get_nn_model(len(index_to_token), w2v_matrix)
     _logger.info('-----')
 
-    train_model(nn_model, w2v_model, dialog_lines_for_nn, lines_for_validation, index_to_token)
+    train_model(nn_model, dialog_lines_for_nn, lines_for_validation, index_to_token)
 
 
 if __name__ == '__main__':

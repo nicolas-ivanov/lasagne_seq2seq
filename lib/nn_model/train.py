@@ -50,7 +50,7 @@ def save_model(nn_model):
     nn_model.save_weights(model_full_path)
 
 
-def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, index_to_token):
+def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_token):
     token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
 
     test_dataset = get_test_dataset()[:SMALL_TEST_DATASET_SIZE]
@@ -66,6 +66,7 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
     X_ids = transform_lines_to_ids(all_train_lines[:-1], token_to_index)
     Y_ids = transform_lines_to_ids(all_train_lines[1:], token_to_index)
     x_test = transform_lines_to_ids(test_dataset, token_to_index)
+    x_val = transform_lines_to_ids(validation_lines, token_to_index)
 
     batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
@@ -104,11 +105,11 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
                     save_model(nn_model)
 
-                    update_perplexity_stamps(perplexity_stamps['validation'], nn_model, validation_lines,
+                    update_perplexity_stamps(perplexity_stamps['validation'], nn_model, x_val,
                                              index_to_token, start_time)
 
-                    train_lines_subset = random.sample(all_train_lines, len(validation_lines))
-                    update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_lines_subset,
+                    train_ids_subset = random.sample(X_ids, x_val.shape[0])
+                    update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_ids_subset,
                                              index_to_token, start_time)
 
                     save_test_results(nn_model, index_to_token, start_time, batch_id, batches_num,
