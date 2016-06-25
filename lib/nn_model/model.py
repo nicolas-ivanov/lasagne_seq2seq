@@ -351,7 +351,6 @@ class Lasagne_Seq2seq:
         target_ids = self.net['l_in_y'].input_var[:, 1:]
         target_ids_flattened = target_ids.flatten()               # "long" vector with target ids
 
-
         cost = categorical_crossentropy(
             predictions=output_probs,
             targets=target_ids_flattened
@@ -533,7 +532,7 @@ def get_nn_model(vocab_size, w2v_matrix):
     _logger.info('NN hidden dimension: %s' % HIDDEN_LAYER_DIMENSION)
     _logger.info('NN output dimension: %s (dict size)' % vocab_size)
 
-    model = Lasagne_Seq2seq(vocab_size, w2v_matrix)
+    model = Lasagne_Seq2seq(vocab_size, w2v_matrix.astype(theano.config.floatX))
 
     if os.path.isfile(NN_MODEL_PATH):
         _logger.info('Loading previously calculated weights...')
