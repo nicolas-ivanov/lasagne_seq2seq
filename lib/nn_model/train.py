@@ -104,11 +104,11 @@ def train_model(nn_model, w2v_model, tokenized_dialog_lines, validation_lines, i
 
                     save_model(nn_model)
 
-                    update_perplexity_stamps(perplexity_stamps['validation'], nn_model, validation_lines, w2v_model,
+                    update_perplexity_stamps(perplexity_stamps['validation'], nn_model, validation_lines,
                                              index_to_token, start_time)
 
                     train_lines_subset = random.sample(all_train_lines, len(validation_lines))
-                    update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_lines_subset, w2v_model,
+                    update_perplexity_stamps(perplexity_stamps['training'], nn_model, train_lines_subset,
                                              index_to_token, start_time)
 
                     save_test_results(nn_model, index_to_token, start_time, batch_id, batches_num,
