@@ -166,7 +166,7 @@ def log_predictions(sentences, sentences_ids, nn_model, index_to_token, stats_in
             csv_writer.writerow([_get_iteration_stats(stats_info)])
 
         for sent, sent_ids in zip(sentences, sentences_ids):
-            prediction, perplexity = get_nn_response(sent, nn_model, index_to_token)
+            prediction, perplexity = get_nn_response(sent_ids, nn_model, index_to_token)
 
             csv_writer.writerow(['', sent, prediction, str(perplexity)])
 
