@@ -29,6 +29,8 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
     tokens_probs = []
 
     curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
+    if len(x_batch.shape) == 1:
+        x_batch = x_batch[np.newaxis, :]
 
     next_token = START_TOKEN
     i = 0
