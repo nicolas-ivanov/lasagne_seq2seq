@@ -68,6 +68,10 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     x_test = transform_lines_to_ids(test_dataset, token_to_index)
     x_val = transform_lines_to_ids(validation_lines, token_to_index)
 
+    X_ids = X_ids[:, ::-1]
+    x_test = x_test[:, ::-1]
+    x_val = x_val[:, ::-1q]
+
     batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
