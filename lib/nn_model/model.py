@@ -98,15 +98,16 @@ class Lasagne_Seq2seq:
         # output ###############################################
         # cut off the last prob vectors for every prob sequence:
         # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
-        net['l_slice'] = SliceLayer(
-            incoming=net['l_dec'],
-            indices=slice(0, -1),  # keep all but the last token
-            axis=1,  # sequneces axis
-            name='slice_layer'
-        )
+        #
+        # net['l_slice'] = SliceLayer(
+        #     incoming=net['l_dec'],
+        #     indices=slice(0, -1),  # keep all but the last token
+        #     axis=1,  # sequneces axis
+        #     name='slice_layer'
+        # )
 
         net['l_dec_long'] = ReshapeLayer(
-            incoming=net['l_slice'],
+            incoming=net['l_dec'],
             shape=(-1, HIDDEN_LAYER_DIMENSION),
             name='reshape_layer'
         )
