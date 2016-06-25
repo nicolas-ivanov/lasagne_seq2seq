@@ -181,7 +181,7 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
     test_dataset = get_test_dataset()
     test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
 
-    log_predictions(test_dataset, test_dataset_ids, nn_model, stats_info)
+    log_predictions(test_dataset, test_dataset_ids, nn_model, index_to_token, stats_info)
 
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
     small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
