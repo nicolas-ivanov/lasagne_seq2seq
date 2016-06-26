@@ -87,6 +87,7 @@ class Lasagne_Seq2seq:
             incoming=net['l_emb_y'],
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
+            learn_init=True,
             grad_clipping=GRAD_CLIP,
             name='lstm_decoder'
         )
