@@ -49,10 +49,11 @@ def get_transformed_dialog_lines(tokenized_dialog_lines, tokens_voc):
 
 
 def get_tokenized_dialog_lines(iterable_dialog_lines):
-    for line in iterable_dialog_lines:
+    for i, line in enumerate(iterable_dialog_lines):
         tokenized_dialog_line = tokenize(line)
         tokenized_dialog_line = [START_TOKEN] + tokenized_dialog_line + [EOS_SYMBOL]
-        yield tokenized_dialog_line
+        if i % 2 == 0:
+            yield tokenized_dialog_line
 
 
 def get_tokenized_dialog_lines_from_processed_corpus(iterable_dialog_lines):
