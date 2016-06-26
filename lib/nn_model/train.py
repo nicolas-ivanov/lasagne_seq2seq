@@ -1,8 +1,10 @@
 import os
+import sys
 import random
 import time
 from collections import namedtuple
 from itertools import tee
+
 
 import datetime
 import numpy as np
@@ -68,9 +70,9 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     x_test = transform_lines_to_ids(test_dataset, token_to_index)
     x_val = transform_lines_to_ids(validation_lines, token_to_index)
 
-    X_ids = X_ids[:, ::-1]
-    x_test = x_test[:, ::-1]
-    x_val = x_val[:, ::-1]
+    X_ids = X_ids[::2, ::-1]
+    x_test = x_test[::2, ::-1]
+    x_val = x_val[::2, ::-1]
 
     batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
@@ -81,7 +83,6 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
             _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
 
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):
-
                 loss = nn_model.train(X_train, Y_train)
 
                 if batch_id % EVALUATE_AND_DUMP_LOSS_FREQUENCY == 0:

@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 from itertools import tee
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,6 +15,15 @@ from utils.utils import get_logger
 
 _logger = get_logger(__name__)
 
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", type=float,
+            help="learning rate", default=0.01)
+    parser.add_argument("-c", type=float,
+            help="gradient clipping", default=100.0)
+
+    args = parser.parse_args()
 
 def learn():
     # preprocess the dialog and get index for its vocabulary
