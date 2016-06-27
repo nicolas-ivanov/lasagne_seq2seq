@@ -65,8 +65,8 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     all_train_lines = list(tokenized_dialog_lines)
     train_lines_num = len(all_train_lines)
 
-    X_ids = transform_lines_to_ids(all_train_lines[:-1], token_to_index)
-    Y_ids = transform_lines_to_ids(all_train_lines[1:], token_to_index)
+    X_ids = transform_lines_to_ids(all_train_lines[0:-1:2], token_to_index)
+    Y_ids = transform_lines_to_ids(all_train_lines[1::2], token_to_index)
     x_test = transform_lines_to_ids(test_dataset, token_to_index)
     x_val = transform_lines_to_ids(validation_lines, token_to_index)
 
