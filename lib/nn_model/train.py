@@ -96,7 +96,9 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
                     for i, sent in enumerate(test_dataset):
                         prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token)
-                        print '%-35s\t -> \t[%.2f]\t%s' % (sent, perplexity, prediction)
+                        print '%-35s\t --t=0.5---> \t[%.2f]\t%s' % (sent, perplexity, prediction)
+                        prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token, temperature=1e-3)
+                        print '%-35s\t --t=0.001-> \t[%.2f]\t%s' % (sent, perplexity, prediction)
 
                     print '\n'
 
