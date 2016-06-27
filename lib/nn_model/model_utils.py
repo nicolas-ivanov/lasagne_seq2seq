@@ -175,8 +175,12 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
                       perplexity_stamps):
     _logger.info('Saving current test results...')
     plot_perplexities(perplexity_stamps)
-    cur_perplexity = perplexity_stamps['validation'][-1][1]
-    stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity)
+    cur_perplexity_val = perplexity_stamps['validation'][-1][1]
+    cur_perplexity_train = perplexity_stamps['training'][-1][1]
+    _logger.info('Current perplexity: train = %0.4f, validation = %0.4f' %
+                 (cur_perplexity_train, cur_perplexity_val))
+
+    stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity_val)
 
     test_dataset = get_test_dataset()
     test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
@@ -186,6 +190,7 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
     small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
     _log_predictions_with_temperatures(small_test_dataset, small_test_dataset_ids, nn_model, index_to_token, stats_info)
+
 
 
 
