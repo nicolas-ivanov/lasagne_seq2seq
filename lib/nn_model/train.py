@@ -121,5 +121,9 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
         _logger.info('Training cycle is stopped manually')
         _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
         if len(perplexity_stamps['validation']) > 0:
+            cur_perplexity_val = perplexity_stamps['validation'][-1][1]
+            cur_perplexity_train = perplexity_stamps['training'][-1][1]
+            _logger.info('Current perplexity: train = %0.4f, validation = %0.4f' %
+                         (cur_perplexity_train, cur_perplexity_val))
             save_test_results(nn_model, index_to_token, token_to_index, start_time, batch_id, batches_num,
                               perplexity_stamps)
