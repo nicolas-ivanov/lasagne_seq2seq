@@ -81,6 +81,17 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):
                 loss = nn_model.train(X_train, Y_train)
 
+                for i in xrange(5):
+                    for j in xrange(INPUT_SEQUENCE_LENGTH):
+                        print index_to_token[X_train[i][j]], ' ',
+                    print '>',
+                    for j in xrange(ANSWER_MAX_TOKEN_LENGTH):
+                        print index_to_token[Y_train[i][j]], ' ',
+                    print
+                print
+
+                sys.exit(0)
+
                 if batch_id % EVALUATE_AND_DUMP_LOSS_FREQUENCY == 0:
                     loss_history.append((time.time(), loss))
 
@@ -120,4 +131,6 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     except (KeyboardInterrupt, SystemExit):
         _logger.info('Training cycle is stopped manually')
         _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
-        save_test_results(nn_model, index_to_token, token_to_index, start_time, batch_id, batches_num, perplexity_stamps)
+        if len(perplexity_stamps['validation']) > 0:
+            save_test_results(nn_model, index_to_token, token_to_index, start_time, batch_id, batches_num,
+                              perplexity_stamps)

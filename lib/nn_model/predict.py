@@ -52,12 +52,12 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
         curr_y_batch[0][i] = next_token_id
 
         # print all sequences for debugging
+        print 'cur sample from prob_batch on token %d: ' % i,
         for d in probs_batch:
             next_token_id, next_token_prob = _sample(d, temperature)
             next_token = index_to_token[next_token_id]
             print next_token,
 
-        print
         print
 
     response_perplexity = get_sequence_perplexity(tokens_probs)

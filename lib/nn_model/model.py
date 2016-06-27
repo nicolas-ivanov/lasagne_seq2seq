@@ -528,13 +528,16 @@ class Lasagne_Seq2seq:
         print '\n', '-'*100
 
 
-def get_nn_model(vocab_size, w2v_matrix):
+def get_nn_model(vocab_size, w2v_matrix=None):
     _logger.info('Initializing NN model with the following params:')
     _logger.info('NN input dimension: %s (token vector size)' % TOKEN_REPRESENTATION_SIZE)
     _logger.info('NN hidden dimension: %s' % HIDDEN_LAYER_DIMENSION)
     _logger.info('NN output dimension: %s (dict size)' % vocab_size)
 
-    model = Lasagne_Seq2seq(vocab_size, w2v_matrix.astype(theano.config.floatX))
+    if w2v_matrix:
+        model = Lasagne_Seq2seq(vocab_size, w2v_matrix.astype(theano.config.floatX))
+    else:
+        model = Lasagne_Seq2seq(vocab_size)
 
     if os.path.isfile(NN_MODEL_PATH):
         _logger.info('Loading previously calculated weights...')
