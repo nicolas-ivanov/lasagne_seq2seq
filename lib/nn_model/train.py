@@ -95,11 +95,9 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                     print NN_MODEL_PARAMS_STR, '\n'
 
                     for i, sent in enumerate(test_dataset):
-                        prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token)
-                        print '%-35s\t --t=0.5---> \t[%.2f]\t%s' % (sent, perplexity, prediction)
-                        prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token, temperature=1e-3)
-                        print '%-35s\t --t=0.001-> \t[%.2f]\t%s' % (sent, perplexity, prediction)
-
+                        for t in [0.5, 0.1, 0.03, 0.01, 0.003]:
+                            prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token, temperature=t)
+                            print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
                     print '\n'
 
                 if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
