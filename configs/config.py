@@ -54,7 +54,7 @@ W2V_PARAMS = {
     "workers_num": 25
 }
 
-GRAD_CLIP = 0
+GRAD_CLIP = 10.0
 LEARNING_RATE = 1.0       # hm, what learning rate should be here?
 NN_LAYERS_NUM = 1
 DROPOUT_RATE = 0.5
