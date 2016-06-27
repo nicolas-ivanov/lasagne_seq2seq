@@ -14,6 +14,7 @@ def _sample(probs, temperature=1.0):
     helper function to sample an index from a probability array
     """
     strethced_probs = np.log(probs) / temperature
+    strethced_probs -= np.max(strethced_probs)
     strethced_probs = np.exp(strethced_probs) / np.sum(np.exp(strethced_probs))
     idx = np.random.choice(strethced_probs.shape[0], p=strethced_probs)
     idx_prob = strethced_probs[idx]
