@@ -101,7 +101,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
                     print
                     print 'Train dataset:'
-                    for i, sent in enumerate(all_train_lines[:SMALL_TEST_DATASET_SIZE]):
+                    for i, sent in enumerate(all_train_lines[:SMALL_TEST_DATASET_SIZE:2]):
                         for t in [0.5, 0.3, 0.1, 0.03, 0.01]:
                             prediction, perplexity = get_nn_response(X_ids[i], nn_model, index_to_token, temperature=t)
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
