@@ -44,11 +44,10 @@ def learn():
         # use gensim implementation of word2vec instead of keras embeddings due to extra flexibility
         w2v_model = w2v.get_dialogs_model(W2V_PARAMS, dialog_lines_for_w2v)
         _logger.info('-----')
-
         w2v_matrix = transform_w2v_model_to_matrix(w2v_model, index_to_token)
     else:
         w2v_matrix = None
-        
+
     nn_model = get_nn_model(len(index_to_token), w2v_matrix)
     _logger.info('-----')
 
