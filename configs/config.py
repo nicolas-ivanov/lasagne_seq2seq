@@ -1,6 +1,8 @@
 import os
 import time
 
+DEBUG_OUTPUT = False
+
 DATA_PATH = '/var/lib/lasagne_seq2seq'
 CORPORA_DIR = 'corpora_raw'
 PROCESSED_CORPORA_DIR = 'corpora_processed'

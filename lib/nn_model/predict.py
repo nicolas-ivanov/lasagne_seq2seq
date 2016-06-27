@@ -1,7 +1,7 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH, TEMPERATURE_VALUES, \
-    INPUT_SEQUENCE_LENGTH, VOCAB_MAX_SIZE
+    INPUT_SEQUENCE_LENGTH, VOCAB_MAX_SIZE, DEBUG_OUTPUT
 from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN, get_input_sequence
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
@@ -51,14 +51,15 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
         i += 1
         curr_y_batch[0][i] = next_token_id
 
-        # print all sequences for debugging
-        print 'cur sample from prob_batch on token %d: ' % i,
-        for d in probs_batch:
-            next_token_id, next_token_prob = _sample(d, temperature)
-            next_token = index_to_token[next_token_id]
-            print next_token,
+        if DEBUG_OUTPUT:
+            # print all sequences for debugging
+            print 'cur sample from prob_batch on token %d: ' % i,
+            for d in probs_batch:
+                next_token_id, next_token_prob = _sample(d, temperature)
+                next_token = index_to_token[next_token_id]
+                print next_token,
 
-        print
+            print
 
     response_perplexity = get_sequence_perplexity(tokens_probs)
 
