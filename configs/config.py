@@ -54,17 +54,18 @@ W2V_PARAMS = {
     "workers_num": 25
 }
 
-GRAD_CLIP = 100.
-LEARNING_RATE = 0.05       # hm, what learning rate should be here?
+GRAD_CLIP = 0
+LEARNING_RATE = 1.0       # hm, what learning rate should be here?
 NN_LAYERS_NUM = 1
 DROPOUT_RATE = 0.5
 DEFAULT_TEMPERATURE = 0.7
 TEMPERATURE_VALUES = [0.3, 0.5, 0.8, 1.2]
 
 def get_nn_params_str():
-    params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_bs{batch_size}'
-    params_str = params_str.format(layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION, dropout_rate=DROPOUT_RATE,
-                                   cont_len=INPUT_SEQUENCE_LENGTH, batch_size=TRAIN_BATCH_SIZE)
+    params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_lr{learning_rate}_gc_{gradient_clip}'
+    params_str = params_str.format(layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION,
+                                   dropout_rate=DROPOUT_RATE,cont_len=INPUT_SEQUENCE_LENGTH,
+                                   learing_rate=LEARNING_RATE, gradient_clip=GRAD_CLIP)
 
     return params_str
 
