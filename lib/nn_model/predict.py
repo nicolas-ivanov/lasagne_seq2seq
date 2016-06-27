@@ -53,8 +53,8 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
 
         if DEBUG_OUTPUT:
             # print all sequences for debugging
-            for i in xrange(ANSWER_MAX_TOKEN_LENGTH):
-                print index_to_token[curr_y_batch[0, i]],
+            for j in xrange(ANSWER_MAX_TOKEN_LENGTH):
+                print index_to_token[curr_y_batch[0, j]],
             print
 
     response_perplexity = get_sequence_perplexity(tokens_probs)
