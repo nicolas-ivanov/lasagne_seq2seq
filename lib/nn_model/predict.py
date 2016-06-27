@@ -28,13 +28,13 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
     response = []
     tokens_probs = []
 
-    curr_y_batch = np.zeros((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32)
+    START_TOKEN_ID = 3 # BECAUSE I SAID SO
+    curr_y_batch = np.ones((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32) * START_TOKEN_ID
     if len(x_batch.shape) == 1:
         x_batch = x_batch[np.newaxis, :]
 
     next_token = START_TOKEN
     i = 0
-
     while next_token != EOS_SYMBOL and len(response) < ANSWER_MAX_TOKEN_LENGTH - 1:
         probs_batch = nn_model.predict(x_batch, curr_y_batch)
 
