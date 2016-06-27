@@ -19,9 +19,9 @@ _logger = get_logger(__name__)
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", dest='learning_rate', type=float,
-                        help="learning rate", default=0.01)
+                        help="learning rate for adadelta", default=0.01)
     parser.add_argument("-c", dest='grad_clip', type=float,
-                        help="gradient clipping", default=100.0)
+                        help="If nonzero, the gradient messages are clipped to the given value during the backward pass", default=100.0)
     parser.add_argument("-w", dest='use_word2vec', action='store_true',
                         help="initialize with word2vec word vectors")
 

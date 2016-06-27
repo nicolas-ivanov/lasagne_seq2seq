@@ -34,8 +34,10 @@ class Repeat(lasagne.layers.Layer):
 
 
 class Lasagne_Seq2seq:
-    def __init__(self, vocab_size, init_embedding=Normal()):
+    def __init__(self, vocab_size, learning_rate=LEARNING_RATE, grad_clip=GRAD_CLIP, init_embedding=Normal()):
         self.vocab_size = vocab_size
+        self.lr = learning_rate
+        self.gc = grad_clip
         self.W = init_embedding
         self.net = self._get_net()                  # seq2seq v1
         # self.net = self._get_concat_net()           # seq2seq v2
@@ -76,7 +78,7 @@ class Lasagne_Seq2seq:
         net['l_enc'] = LSTMLayer(
             incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
-            grad_clipping=GRAD_CLIP,
+            grad_clipping=self.gc,
             only_return_final=True,
             name='lstm_encoder'
         )
