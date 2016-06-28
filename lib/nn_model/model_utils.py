@@ -32,7 +32,7 @@ def get_test_dataset():
     return test_dataset
 
 
-def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len):
+def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len, reversed=False):
     """
     :param lines_to_transform: list of lists of tokens to transform to ids
     :param token_to_index: dict that maps each token to its id
@@ -50,10 +50,12 @@ def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len):
         for j, token in enumerate(line):
             if j >= max_sent_len:
                 break
-            if token in token_to_index:
-                X[i, j] = token_to_index[token]
+
+            id_to_use = token_to_index[token] if token in token_to_index else token_to_index[EMPTY_TOKEN]
+            if reversed:
+                X[i, max_sent_len - 1 - j] = id_to_use
             else:
-                X[i, j] = token_to_index[EMPTY_TOKEN]
+                X[i, j] = id_to_use
 
     return X
 

@@ -3,9 +3,6 @@ import random
 import time
 from collections import namedtuple
 from itertools import tee, islice
-
-
-
 import datetime
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
@@ -52,7 +49,7 @@ def get_training_batch(X_ids, Y_ids):
     for i in xrange(n_batches):
         start = i * SAMPLES_BATCH_SIZE
         end = (i + 1) * SAMPLES_BATCH_SIZE
-        yield X_ids[start:end, ::-1], Y_ids[start:end, :]
+        yield X_ids[start:end, :], Y_ids[start:end, :]
 
 
 def save_model(nn_model):
@@ -74,10 +71,10 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     odd_iterator = islice(odd_iterator, 1, None, 2)
     train_dataset_sample = list(islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE))
 
-    X_ids = transform_lines_to_ids(even_iterator, token_to_index, INPUT_SEQUENCE_LENGTH)
+    X_ids = transform_lines_to_ids(even_iterator, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
     Y_ids = transform_lines_to_ids(odd_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH)
-    x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
-    x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH)
+    x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
+    x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
 
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
