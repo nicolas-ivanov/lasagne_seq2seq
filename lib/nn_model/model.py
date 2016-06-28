@@ -153,6 +153,9 @@ class Lasagne_Seq2seq:
             output_size=TOKEN_REPRESENTATION_SIZE,
             W=self.W
         )
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
+            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
 
         # encoder ###############################################
         net['l_enc'] = LSTMLayer(
