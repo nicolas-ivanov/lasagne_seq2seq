@@ -2,6 +2,8 @@ import os
 import random
 import time
 from collections import namedtuple
+from itertools import tee, islice
+
 
 
 import datetime
@@ -62,14 +64,18 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
 
     test_dataset = get_test_dataset()[:SMALL_TEST_DATASET_SIZE]
-
     start_time = time.time()
     full_data_pass_num = 1
     batch_id = 1
 
     # tokenized_dialog_lines is an iterator and only allows sequential access, so get array of train lines
-    X_ids = transform_lines_to_ids(yield_even_from(tokenized_dialog_lines), token_to_index, INPUT_SEQUENCE_LENGTH)
-    Y_ids = transform_lines_to_ids(yield_odd_from(tokenized_dialog_lines), token_to_index, ANSWER_MAX_TOKEN_LENGTH)
+    even_iterator, odd_iterator, iterator_for_validation = tee(tokenized_dialog_lines, 3)
+    even_iterator = islice(even_iterator, 0, None, 2)
+    odd_iterator = islice(odd_iterator, 1, None, 2)
+    train_dataset_sample = islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE)
+
+    X_ids = transform_lines_to_ids(even_iterator, token_to_index, INPUT_SEQUENCE_LENGTH)
+    Y_ids = transform_lines_to_ids(odd_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH)
     x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
     x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH)
 
@@ -119,9 +125,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
                     print
                     print 'Train dataset:'
-                    for i, sent in enumerate(tokenized_dialog_lines):
-                        if i > SMALL_TEST_DATASET_SIZE:
-                            break
+                    for i, sent in enumerate(train_dataset_sample):
                         for t in [0.5, 0.3, 0.1, 0.03, 0.01]:
                             prediction, perplexity = get_nn_response(X_ids[i], nn_model, index_to_token, temperature=t)
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)

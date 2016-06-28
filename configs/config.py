@@ -10,7 +10,7 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'repeated_phrases_1m'
+CORPUS_NAME = 'repeated_phrases'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
@@ -20,8 +20,8 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
 VOCAB_MAX_SIZE = 10000
-INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
-USE_PRETRAINED_W2V = True
+INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = False
+USE_PRETRAINED_W2V = False
 LEARN_WORD_EMBEDDINGS = True
 GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
@@ -33,7 +33,7 @@ ANSWER_MAX_TOKEN_LENGTH = 10
 # set training params
 TRAIN_BATCH_SIZE = 512
 SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
-SMALL_TEST_DATASET_SIZE = 10
+SMALL_TEST_DATASET_SIZE = 5
 TEST_PREDICTIONS_FREQUENCY = 500
 BIG_TEST_PREDICTIONS_FREQUENCY = 1000
 FULL_LEARN_ITER_NUM = 5000
