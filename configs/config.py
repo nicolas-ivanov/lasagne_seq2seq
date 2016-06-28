@@ -10,7 +10,7 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'repeated_phrases'
+CORPUS_NAME = 'repeated_phrases_1m'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
