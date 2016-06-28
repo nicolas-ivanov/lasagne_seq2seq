@@ -39,7 +39,7 @@ class Lasagne_Seq2seq:
         self.lr = learning_rate
         self.gc = grad_clip
         self.W = init_embedding
-        self.net = self._get_gru_net()                  # seq2seq v1
+        self.net = self._get_net()                  # seq2seq v1
         # self.net = self._get_concat_net()           # seq2seq v2
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
