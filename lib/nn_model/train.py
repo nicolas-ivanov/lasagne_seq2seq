@@ -81,7 +81,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                          (full_data_pass_num, objects_processed, time.time() - start_time, total_training_time))
 
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):
-                prev_time = nn_model.train(X_train, Y_train)
+                prev_time = time.time()
                 loss = nn_model.train(X_train, Y_train)
                 total_training_time += time.time() - prev_time
                 objects_processed += X_train.shape[0]
