@@ -72,7 +72,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     even_iterator, odd_iterator, iterator_for_validation = tee(tokenized_dialog_lines, 3)
     even_iterator = islice(even_iterator, 0, None, 2)
     odd_iterator = islice(odd_iterator, 1, None, 2)
-    train_dataset_sample = islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE)
+    train_dataset_sample = list(islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE))
 
     X_ids = transform_lines_to_ids(even_iterator, token_to_index, INPUT_SEQUENCE_LENGTH)
     Y_ids = transform_lines_to_ids(odd_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH)
