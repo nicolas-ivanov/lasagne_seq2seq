@@ -2,6 +2,7 @@ import os
 import time
 
 DEBUG_OUTPUT = True
+USE_GRU = True  # use GRU cells instead of LSTM cells
 
 DATA_PATH = '/var/lib/lasagne_seq2seq'
 CORPORA_DIR = 'corpora_raw'

@@ -12,7 +12,7 @@ from lasagne.objectives import categorical_crossentropy
 from lasagne.init import Normal
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
-    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS
+    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS, USE_GRU
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
@@ -39,7 +39,10 @@ class Lasagne_Seq2seq:
         self.lr = learning_rate
         self.gc = grad_clip
         self.W = init_embedding
-        self.net = self._get_net()                  # seq2seq v1
+        if USE_GRU:
+            self.net = self._get_net()                  # seq2seq v1
+        else:
+            self.net = self._get_gru_net()
         # self.net = self._get_concat_net()           # seq2seq v2
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
