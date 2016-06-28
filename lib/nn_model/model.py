@@ -12,7 +12,7 @@ from lasagne.objectives import categorical_crossentropy
 from lasagne.init import Normal
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
-    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE
+    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
@@ -66,6 +66,8 @@ class Lasagne_Seq2seq:
             output_size=TOKEN_REPRESENTATION_SIZE,
             W=self.W
         )
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
 
         net['l_emb_y'] = EmbeddingLayer(
             incoming=net['l_in_y'],
@@ -73,6 +75,8 @@ class Lasagne_Seq2seq:
             output_size=TOKEN_REPRESENTATION_SIZE,
             W=self.W
         )
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
 
         # encoder ###############################################
         net['l_enc'] = GRULayer(
