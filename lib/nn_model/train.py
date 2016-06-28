@@ -50,7 +50,7 @@ def get_training_batch(X_ids, Y_ids):
     for i in xrange(n_batches):
         start = i * SAMPLES_BATCH_SIZE
         end = (i + 1) * SAMPLES_BATCH_SIZE
-        yield X_ids[start:end, :], Y_ids[start:end, :]
+        yield X_ids[start:end, ::-1], Y_ids[start:end, :]
 
 
 def save_model(nn_model):
