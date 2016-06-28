@@ -63,7 +63,7 @@ DEFAULT_TEMPERATURE = 0.7
 TEMPERATURE_VALUES = [0.3, 0.5, 0.8, 1.2]
 
 def get_nn_params_str():
-    params_str = '_gru_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_lr{learning_rate}_gc_{gradient_clip}'
+    params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_lr{learning_rate}_gc_{gradient_clip}'
     params_str = params_str.format(layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION,
                                    dropout_rate=DROPOUT_RATE,cont_len=INPUT_SEQUENCE_LENGTH,
                                    learning_rate=LEARNING_RATE, gradient_clip=GRAD_CLIP)
