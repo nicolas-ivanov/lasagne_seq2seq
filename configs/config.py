@@ -1,7 +1,7 @@
 import os
 import time
 
-DEBUG_OUTPUT = True
+
 USE_GRU = True  # use GRU cells instead of LSTM cells
 
 DATA_PATH = '/var/lib/lasagne_seq2seq'
@@ -20,9 +20,10 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
 VOCAB_MAX_SIZE = 10000
-LEARN_WORD_EMBEDDINGS = False
-USE_PRETRAINED = True
-GLOVE_MODEL_PATH = 'data/glove.6B.200d_1k.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
+INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
+USE_PRETRAINED_W2V = True
+LEARN_WORD_EMBEDDINGS = True
+GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 512
@@ -33,7 +34,6 @@ ANSWER_MAX_TOKEN_LENGTH = 10
 TRAIN_BATCH_SIZE = 512
 SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
 SMALL_TEST_DATASET_SIZE = 10
-EVALUATE_AND_DUMP_LOSS_FREQUENCY = 1
 TEST_PREDICTIONS_FREQUENCY = 500
 BIG_TEST_PREDICTIONS_FREQUENCY = 1000
 FULL_LEARN_ITER_NUM = 5000
@@ -44,7 +44,7 @@ PROCESSED_CORPUS_PATH = os.path.join(DATA_PATH, PROCESSED_CORPORA_DIR, CORPUS_NA
 
 # w2v params that depend on previous params
 W2V_PARAMS = {
-    "use_pretrained": USE_PRETRAINED,
+    "use_pretrained": USE_PRETRAINED_W2V,
     "txt_path": GLOVE_MODEL_PATH,
     "corpus_name": CORPUS_NAME,
     "save_path": DATA_PATH,

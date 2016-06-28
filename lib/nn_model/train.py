@@ -1,27 +1,34 @@
 import os
-import sys
 import random
 import time
 from collections import namedtuple
-from itertools import tee
 
 
 import datetime
-import numpy as np
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
-    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR, EVALUATE_AND_DUMP_LOSS_FREQUENCY
+    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset, plot_loss, \
     transform_lines_to_ids, get_test_dataset_ids
 from lib.nn_model.predict import get_nn_response
-from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
 
 StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_num')
 
 _logger = get_logger(__name__)
 
+
+def yield_even_from(orig_iterator):
+    for i, x in enumerate(orig_iterator):
+        if i % 2 == 0:
+            yield x
+
+
+def yield_odd_from(orig_iterator):
+    for i, x in enumerate(orig_iterator):
+        if i % 2 == 1:
+            yield x
 
 def log_predictions(sentences, nn_model, index_to_token, stats_info=None):
     for sent in sentences:
@@ -61,19 +68,16 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     batch_id = 1
 
     # tokenized_dialog_lines is an iterator and only allows sequential access, so get array of train lines
-    all_train_lines = list(tokenized_dialog_lines)
-    train_lines_num = len(all_train_lines)
-
-    X_ids = transform_lines_to_ids(all_train_lines[0:-1:2], token_to_index, INPUT_SEQUENCE_LENGTH)
-    Y_ids = transform_lines_to_ids(all_train_lines[1::2], token_to_index, ANSWER_MAX_TOKEN_LENGTH)
+    X_ids = transform_lines_to_ids(yield_even_from(tokenized_dialog_lines), token_to_index, INPUT_SEQUENCE_LENGTH)
+    Y_ids = transform_lines_to_ids(yield_odd_from(tokenized_dialog_lines), token_to_index, ANSWER_MAX_TOKEN_LENGTH)
     x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
     x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH)
 
-    batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
     objects_processed = 0
     total_training_time = 0
+    batches_num = X_ids.shape[0] / SAMPLES_BATCH_SIZE
 
     try:
         for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
@@ -95,15 +99,14 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                 #
                 # sys.exit(0)
 
-                if batch_id % EVALUATE_AND_DUMP_LOSS_FREQUENCY == 0:
-                    loss_history.append((time.time(), loss))
+                loss_history.append((time.time(), loss))
 
-                    progress = float(batch_id) / batches_num * 100
-                    avr_time_per_sample = (time.time() - start_time) / batch_id
-                    expected_time_per_epoch = avr_time_per_sample * batches_num
+                progress = float(batch_id) / batches_num * 100
+                avr_time_per_sample = (time.time() - start_time) / batch_id
+                expected_time_per_epoch = avr_time_per_sample * batches_num
 
-                    print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
-                          % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
+                print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
+                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 1:
                     print '\n', datetime.datetime.now().time()
@@ -116,11 +119,12 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
                     print
                     print 'Train dataset:'
-                    for i, sent in enumerate(all_train_lines[:SMALL_TEST_DATASET_SIZE:2]):
+                    for i, sent in enumerate(tokenized_dialog_lines):
+                        if i > SMALL_TEST_DATASET_SIZE:
+                            break
                         for t in [0.5, 0.3, 0.1, 0.03, 0.01]:
                             prediction, perplexity = get_nn_response(X_ids[i], nn_model, index_to_token, temperature=t)
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
-
 
                 if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
                     plot_loss(loss_history)

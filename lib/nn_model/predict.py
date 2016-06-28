@@ -1,7 +1,7 @@
 import numpy as np
 
 from configs.config import TOKEN_REPRESENTATION_SIZE, TRAIN_BATCH_SIZE, ANSWER_MAX_TOKEN_LENGTH, TEMPERATURE_VALUES, \
-    INPUT_SEQUENCE_LENGTH, VOCAB_MAX_SIZE, DEBUG_OUTPUT
+    INPUT_SEQUENCE_LENGTH, VOCAB_MAX_SIZE
 from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN, get_input_sequence
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
