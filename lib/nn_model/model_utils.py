@@ -59,10 +59,6 @@ def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len, rev
 
     return X
 
-def get_test_dataset_ids(token_to_index):
-    test_dataset = get_test_dataset()
-    return transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
-
 
 def _get_iteration_stats(stats_info):
     stats_str = 'Sents batch iteration number %s\n' % str(stats_info.iteration_num)
@@ -194,12 +190,12 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
     stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity_val)
 
     test_dataset = get_test_dataset()
-    test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
+    test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
 
     log_predictions(test_dataset, test_dataset_ids, nn_model, index_to_token, stats_info)
 
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
-    small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
+    small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
     _log_predictions_with_temperatures(small_test_dataset, small_test_dataset_ids, nn_model, index_to_token, stats_info)
 
 

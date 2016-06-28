@@ -9,7 +9,7 @@ from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
     SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset, plot_loss, \
-    transform_lines_to_ids, get_test_dataset_ids
+    transform_lines_to_ids
 from lib.nn_model.predict import get_nn_response
 from utils.utils import get_logger
 
