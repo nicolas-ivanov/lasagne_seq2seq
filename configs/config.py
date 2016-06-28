@@ -27,8 +27,8 @@ GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http:/
 
 #set seq2seq params
 HIDDEN_LAYER_DIMENSION = 512
-INPUT_SEQUENCE_LENGTH = 10
-ANSWER_MAX_TOKEN_LENGTH = 10
+INPUT_SEQUENCE_LENGTH = 5
+ANSWER_MAX_TOKEN_LENGTH = 5
 
 # set training params
 TRAIN_BATCH_SIZE = 512
