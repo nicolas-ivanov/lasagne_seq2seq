@@ -32,14 +32,23 @@ def get_test_dataset():
     return test_dataset
 
 
-def transform_lines_to_ids(lines_to_transform, token_to_index):
+def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len):
+    """
+    :param lines_to_transform: list of lists of tokens to transform to ids
+    :param token_to_index: dict that maps each token to its id
+    :param max_sent_len:
+    :return: X -- numpy array, dtype=np.int32, shape = (len(lines_to_transform), max_sent_len).
+    I-th row contains transformed first max_set_len tokens of i-th line of lines_to_transform.
+    The rest of each line is ignored.
+    if length of a line is less that max_sent_len, it's padded with token_to_index[PAD_TOKEN]
+    """
     lines_to_transform = list(lines_to_transform) # transform generator into list if necessary
     n_dialogs = len(lines_to_transform)
-    X = np.ones((n_dialogs, INPUT_SEQUENCE_LENGTH), dtype=np.int32) * token_to_index[PAD_TOKEN]
+    X = np.ones((n_dialogs, max_sent_len), dtype=np.int32) * token_to_index[PAD_TOKEN]
 
     for i, line in enumerate(lines_to_transform[:-1]):
         for j, token in enumerate(line):
-            if j >= INPUT_SEQUENCE_LENGTH:
+            if j >= max_sent_len:
                 break
             if token in token_to_index:
                 X[i, j] = token_to_index[token]
@@ -50,7 +59,7 @@ def transform_lines_to_ids(lines_to_transform, token_to_index):
 
 def get_test_dataset_ids(token_to_index):
     test_dataset = get_test_dataset()
-    return transform_lines_to_ids(test_dataset, token_to_index)
+    return transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
 
 
 def _get_iteration_stats(stats_info):
@@ -183,12 +192,12 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
     stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity_val)
 
     test_dataset = get_test_dataset()
-    test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
+    test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
 
     log_predictions(test_dataset, test_dataset_ids, nn_model, index_to_token, stats_info)
 
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
-    small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index)
+    small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
     _log_predictions_with_temperatures(small_test_dataset, small_test_dataset_ids, nn_model, index_to_token, stats_info)
 
 

@@ -64,21 +64,33 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     all_train_lines = list(tokenized_dialog_lines)
     train_lines_num = len(all_train_lines)
 
-    X_ids = transform_lines_to_ids(all_train_lines[0:-1:2], token_to_index)
-    Y_ids = transform_lines_to_ids(all_train_lines[1::2], token_to_index)
-    x_test = transform_lines_to_ids(test_dataset, token_to_index)
-    x_val = transform_lines_to_ids(validation_lines, token_to_index)
+    X_ids = transform_lines_to_ids(all_train_lines[0:-1:2], token_to_index, INPUT_SEQUENCE_LENGTH)
+    Y_ids = transform_lines_to_ids(all_train_lines[1::2], token_to_index, ANSWER_MAX_TOKEN_LENGTH)
+    x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH)
+    x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH)
 
     batches_num = train_lines_num / SAMPLES_BATCH_SIZE
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
+    objects_processed = 0
 
     try:
         for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
-            _logger.info('\nFull-data-pass iteration num: ' + str(full_data_pass_num))
+            _logger.info('\nStarting epoche #%d; %d objects processed; time = %0.2f' %
+                         (full_data_pass_num, objects_processed, time.time() - start_time))
 
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):
                 loss = nn_model.train(X_train, Y_train)
+                objects_processed += X_train.shape[0]
+                # for i in xrange(5):
+                #     for j in xrange(10):
+                #         print index_to_token[X_train[i, j]], ' ',
+                #     print '>',
+                #     for j in xrange(10):
+                #         print index_to_token[Y_train[i, j]], ' ',
+                #     print
+                #
+                # sys.exit(0)
 
                 if batch_id % EVALUATE_AND_DUMP_LOSS_FREQUENCY == 0:
                     loss_history.append((time.time(), loss))
