@@ -21,8 +21,8 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
 VOCAB_MAX_SIZE = 10000
-INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = False
-USE_PRETRAINED_W2V = False
+INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
+USE_PRETRAINED_W2V = True
 LEARN_WORD_EMBEDDINGS = True
 GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
