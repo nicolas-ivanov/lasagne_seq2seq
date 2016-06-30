@@ -12,7 +12,7 @@ from lasagne.objectives import categorical_crossentropy
 from lasagne.init import Normal
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
-    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS, USE_GRU
+    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS, USE_GRU, CONSTANTLY_FEED_HIDDEN_STATE
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
@@ -40,10 +40,14 @@ class Lasagne_Seq2seq:
         self.gc = grad_clip
         self.W = init_embedding
         if USE_GRU:
-            self.net = self._get_gru_net()                  # seq2seq v1
+            self.rnn_layer = GRULayer
         else:
-            self.net = self._get_net()
-        # self.net = self._get_concat_net()           # seq2seq v2
+            self.rnn_layer = LSTMLayer
+
+        if CONSTANTLY_FEED_HIDDEN_STATE:
+            self.net = self._get_concat_net() # seq2seq v2
+        else:
+            self.net = self._get_net() # seq2seq v1
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
         # self.encode = self._get_encoder_fun()
@@ -51,86 +55,6 @@ class Lasagne_Seq2seq:
         # self.embedding = self._get_embedding_fun()
         # self.slicing = self._get_slice_fun()
         # self.decoding = self._get_dec_fun()
-
-    def _get_gru_net(self):
-        net = OrderedDict()
-
-        net['l_in_x'] = InputLayer(shape=(None, None),
-                                   input_var=T.imatrix(name="enc_ix"),
-                                   name="encoder_seq_ix")
-
-        net['l_in_y'] = InputLayer(shape=(None, None),
-                                   input_var=T.imatrix(name="dec_ix"),
-                                   name="decoder_seq_ix")
-
-        net['l_emb_x'] = EmbeddingLayer(
-            incoming=net['l_in_x'],
-            input_size=self.vocab_size,
-            output_size=TOKEN_REPRESENTATION_SIZE,
-            W=self.W
-        )
-        if not LEARN_WORD_EMBEDDINGS:
-            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
-
-        net['l_emb_y'] = EmbeddingLayer(
-            incoming=net['l_in_y'],
-            input_size=self.vocab_size,
-            output_size=TOKEN_REPRESENTATION_SIZE,
-            W=self.W
-        )
-        if not LEARN_WORD_EMBEDDINGS:
-            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
-
-        # encoder ###############################################
-        net['l_enc'] = GRULayer(
-            incoming=net['l_emb_x'],
-            num_units=HIDDEN_LAYER_DIMENSION,
-            grad_clipping=self.gc,
-            only_return_final=True,
-            name='lstm_encoder'
-        )
-
-        # decoder ###############################################
-
-        net['l_dec'] = GRULayer(
-            incoming=net['l_emb_y'],
-            num_units=HIDDEN_LAYER_DIMENSION,
-            hid_init=net['l_enc'],
-            grad_clipping=GRAD_CLIP,
-            name='lstm_decoder'
-        )
-
-        # decoder returns the batch of sequences of though vectors, each corresponds to a decoded token
-        # reshape this 3d tensor to 2d matrix so that the next Dense layer can convert each though vector to
-        # probability distribution vector
-
-        # output ###############################################
-        # cut off the last prob vectors for every prob sequence:
-        # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
-
-        net['l_slice'] = SliceLayer(
-            incoming=net['l_dec'],
-            indices=slice(0, -1),  # keep all but the last token
-            axis=1,  # sequneces axis
-            name='slice_layer'
-        )
-
-        net['l_dec_long'] = ReshapeLayer(
-            incoming=net['l_slice'],
-            shape=(-1, HIDDEN_LAYER_DIMENSION),
-            name='reshape_layer'
-        )
-
-        net['l_dist'] = DenseLayer(
-            incoming=net['l_dec_long'],
-            num_units=self.vocab_size,
-            nonlinearity=lasagne.nonlinearities.softmax,
-            name="dense_output_probas"
-        )
-
-        # don't need to reshape back, can compare this "long" output with true one-hot vectors
-
-        return net
 
     def _get_net(self):
         net = OrderedDict()
@@ -161,7 +85,7 @@ class Lasagne_Seq2seq:
             net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
 
         # encoder ###############################################
-        net['l_enc'] = LSTMLayer(
+        net['l_enc'] = self.rnn_layer(
             incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=self.gc,
@@ -171,7 +95,7 @@ class Lasagne_Seq2seq:
 
         # decoder ###############################################
 
-        net['l_dec'] = LSTMLayer(
+        net['l_dec'] = self.rnn_layer(
             incoming=net['l_emb_y'],
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
@@ -363,17 +287,36 @@ class Lasagne_Seq2seq:
     def _get_concat_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="enc_ix"),
+
+        net['l_in_x'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="dec_ix"),
+        net['l_in_y'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
 
-        # encoder ###############################################
-        net['l_enc'] = LSTMLayer(
+        net['l_emb_x'] = EmbeddingLayer(
             incoming=net['l_in_x'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        net['l_emb_y'] = EmbeddingLayer(
+            incoming=net['l_in_y'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
+            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
+
+        # encoder ###############################################
+        net['l_enc'] = self.rnn_layer(
+            incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
             only_return_final=True,
@@ -388,12 +331,12 @@ class Lasagne_Seq2seq:
         )
 
         net['l_concat'] = ConcatLayer(
-            incomings=[net['l_in_y'], net['l_enc_repeated']],
+            incomings=[net['l_emb_y'], net['l_enc_repeated']],
             axis=2,
             name='concat_layer'
         )
 
-        net['l_dec'] = LSTMLayer(
+        net['l_dec'] = self.rnn_layer(
             incoming=net['l_concat'],
             num_units=HIDDEN_LAYER_DIMENSION,
             # hid_init=net['l_enc'],

@@ -3,6 +3,7 @@ import time
 
 
 USE_GRU = True  # use GRU cells instead of LSTM cells
+CONSTANTLY_FEED_HIDDEN_STATE = True
 
 DATA_PATH = '/var/lib/lasagne_seq2seq'
 CORPORA_DIR = 'corpora_raw'
