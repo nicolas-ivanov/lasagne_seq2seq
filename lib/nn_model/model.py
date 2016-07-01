@@ -5,13 +5,14 @@ from collections import OrderedDict
 import lasagne
 import theano
 import theano.tensor as T
-from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, ReshapeLayer, \
+from lasagne.layers import InputLayer, DenseLayer, LSTMLayer, GRULayer, ReshapeLayer, EmbeddingLayer, \
     get_output, get_all_params, get_all_param_values, set_all_param_values, get_all_layers, get_output_shape, SliceLayer, \
     ConcatLayer, DropoutLayer
 from lasagne.objectives import categorical_crossentropy
+from lasagne.init import Normal
 
 from configs.config import HIDDEN_LAYER_DIMENSION, TOKEN_REPRESENTATION_SIZE, GRAD_CLIP, NN_MODEL_PATH, LEARNING_RATE, \
-    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE
+    ANSWER_MAX_TOKEN_LENGTH, DROPOUT_RATE ,LEARN_WORD_EMBEDDINGS, USE_GRU, CONSTANTLY_FEED_HIDDEN_STATE
 from utils.utils import get_logger
 
 _logger = get_logger(__name__)
@@ -33,10 +34,20 @@ class Repeat(lasagne.layers.Layer):
 
 
 class Lasagne_Seq2seq:
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, learning_rate=LEARNING_RATE, grad_clip=GRAD_CLIP, init_embedding=Normal()):
         self.vocab_size = vocab_size
-        self.net = self._get_net()                  # seq2seq v1
-        # self.net = self._get_concat_net()           # seq2seq v2
+        self.lr = learning_rate
+        self.gc = grad_clip
+        self.W = init_embedding
+        if USE_GRU:
+            self.rnn_layer = GRULayer
+        else:
+            self.rnn_layer = LSTMLayer
+
+        if CONSTANTLY_FEED_HIDDEN_STATE:
+            self.net = self._get_concat_net() # seq2seq v2
+        else:
+            self.net = self._get_net() # seq2seq v1
         self.train = self._get_train_fun()
         self.predict = self._get_predict_fun()
         # self.encode = self._get_encoder_fun()
@@ -48,27 +59,44 @@ class Lasagne_Seq2seq:
     def _get_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="enc_ix"),
+        net['l_in_x'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="dec_ix"),
+        net['l_in_y'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
 
-        # encoder ###############################################
-        net['l_enc'] = LSTMLayer(
+        net['l_emb_x'] = EmbeddingLayer(
             incoming=net['l_in_x'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        net['l_emb_y'] = EmbeddingLayer(
+            incoming=net['l_in_y'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
+            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
+
+        # encoder ###############################################
+        net['l_enc'] = self.rnn_layer(
+            incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
-            grad_clipping=GRAD_CLIP,
+            grad_clipping=self.gc,
             only_return_final=True,
             name='lstm_encoder'
         )
 
         # decoder ###############################################
 
-        net['l_dec'] = LSTMLayer(
-            incoming=net['l_in_y'],
+        net['l_dec'] = self.rnn_layer(
+            incoming=net['l_emb_y'],
             num_units=HIDDEN_LAYER_DIMENSION,
             hid_init=net['l_enc'],
             grad_clipping=GRAD_CLIP,
@@ -82,6 +110,7 @@ class Lasagne_Seq2seq:
         # output ###############################################
         # cut off the last prob vectors for every prob sequence:
         # they correspond to the tokens that go after EOS_TOKEN and we are not interested in it
+
         net['l_slice'] = SliceLayer(
             incoming=net['l_dec'],
             indices=slice(0, -1),  # keep all but the last token
@@ -258,17 +287,36 @@ class Lasagne_Seq2seq:
     def _get_concat_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="enc_ix"),
+
+        net['l_in_x'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None, TOKEN_REPRESENTATION_SIZE),
-                                   input_var=T.tensor3(name="dec_ix"),
+        net['l_in_y'] = InputLayer(shape=(None, None),
+                                   input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
 
-        # encoder ###############################################
-        net['l_enc'] = LSTMLayer(
+        net['l_emb_x'] = EmbeddingLayer(
             incoming=net['l_in_x'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        net['l_emb_y'] = EmbeddingLayer(
+            incoming=net['l_in_y'],
+            input_size=self.vocab_size,
+            output_size=TOKEN_REPRESENTATION_SIZE,
+            W=self.W
+        )
+
+        if not LEARN_WORD_EMBEDDINGS:
+            net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
+            net['l_emb_y'].params[net['l_emb_y'].W].remove('trainable')
+
+        # encoder ###############################################
+        net['l_enc'] = self.rnn_layer(
+            incoming=net['l_emb_x'],
             num_units=HIDDEN_LAYER_DIMENSION,
             grad_clipping=GRAD_CLIP,
             only_return_final=True,
@@ -283,12 +331,12 @@ class Lasagne_Seq2seq:
         )
 
         net['l_concat'] = ConcatLayer(
-            incomings=[net['l_in_y'], net['l_enc_repeated']],
+            incomings=[net['l_emb_y'], net['l_enc_repeated']],
             axis=2,
             name='concat_layer'
         )
 
-        net['l_dec'] = LSTMLayer(
+        net['l_dec'] = self.rnn_layer(
             incoming=net['l_concat'],
             num_units=HIDDEN_LAYER_DIMENSION,
             # hid_init=net['l_enc'],
@@ -331,9 +379,8 @@ class Lasagne_Seq2seq:
     def _get_train_fun(self):
         output_probs = get_output(self.net['l_dist'])   # "long" 2d matrix with prob distribution
 
-        input_ids = T.imatrix()
         # cut off the first ids from every id sequence: they correspond to START_TOKEN, that we are not predicting
-        target_ids = input_ids[:, 1:]
+        target_ids = self.net['l_in_y'].input_var[:, 1:]
         target_ids_flattened = target_ids.flatten()               # "long" vector with target ids
 
         cost = categorical_crossentropy(
@@ -352,7 +399,7 @@ class Lasagne_Seq2seq:
 
         print("Compiling train function...")
         train_fun = theano.function(
-            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var, input_ids],
+            inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
             outputs=cost,
             updates=updates
         )
@@ -511,13 +558,16 @@ class Lasagne_Seq2seq:
         print '\n', '-'*100
 
 
-def get_nn_model(vocab_size):
+def get_nn_model(vocab_size, w2v_matrix=None):
     _logger.info('Initializing NN model with the following params:')
     _logger.info('NN input dimension: %s (token vector size)' % TOKEN_REPRESENTATION_SIZE)
     _logger.info('NN hidden dimension: %s' % HIDDEN_LAYER_DIMENSION)
     _logger.info('NN output dimension: %s (dict size)' % vocab_size)
 
-    model = Lasagne_Seq2seq(vocab_size)
+    if not w2v_matrix is None:
+        model = Lasagne_Seq2seq(vocab_size, w2v_matrix.astype(theano.config.floatX))
+    else:
+        model = Lasagne_Seq2seq(vocab_size)
 
     if os.path.isfile(NN_MODEL_PATH):
         _logger.info('Loading previously calculated weights...')

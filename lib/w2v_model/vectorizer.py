@@ -11,7 +11,11 @@ def get_token_vector(token, model):
     if token in model.vocab:
         return np.array(model[token])
 
-    return np.array(model[EMPTY_TOKEN])
+    # if empty token exists (there was a word that didn't occur in the training set so we created it)
+    if EMPTY_TOKEN in model.vocab:
+        return np.array(model[EMPTY_TOKEN])
+
+    return np.zeros(TOKEN_REPRESENTATION_SIZE, dtype=np.float32)
 
 
 def get_vectorized_token_sequence(sequence, w2v_model, max_sequence_length, reverse=False):
