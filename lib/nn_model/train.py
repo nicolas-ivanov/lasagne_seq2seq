@@ -7,7 +7,7 @@ import datetime
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
-    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR
+    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR, TEMPERATURE_VALUES
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset, plot_loss, \
     transform_lines_to_ids
 from lib.nn_model.predict import get_nn_response
@@ -107,13 +107,13 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
                     print 'Test dataset:'
                     for i, sent in enumerate(test_dataset):
-                        for t in [0.5, 0.3, 0.1, 0.03, 0.01]:
+                        for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(x_test[i], nn_model, index_to_token, temperature=t)
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
                     print
                     print 'Train dataset:'
                     for i, sent in enumerate(train_dataset_sample):
-                        for t in [0.5, 0.3, 0.1, 0.03, 0.01]:
+                        for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(X_ids[i], nn_model, index_to_token, temperature=t)
                             print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (sent, t, perplexity, prediction)
 
