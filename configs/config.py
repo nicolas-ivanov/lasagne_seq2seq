@@ -24,6 +24,7 @@ VOCAB_MAX_SIZE = 10000
 INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
 USE_PRETRAINED_W2V = True
 LEARN_WORD_EMBEDDINGS = True
+
 GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
 #set seq2seq params

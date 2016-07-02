@@ -8,7 +8,6 @@ from utils.utils import get_logger
 
 _logger = get_logger(__name__)
 
-
 def _sample(probs, temperature=1.0):
     """
     helper function to sample an index from a probability array
