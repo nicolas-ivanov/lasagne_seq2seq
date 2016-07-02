@@ -18,17 +18,6 @@ StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_nu
 _logger = get_logger(__name__)
 
 
-def yield_even_from(orig_iterator):
-    for i, x in enumerate(orig_iterator):
-        if i % 2 == 0:
-            yield x
-
-
-def yield_odd_from(orig_iterator):
-    for i, x in enumerate(orig_iterator):
-        if i % 2 == 1:
-            yield x
-
 def log_predictions(sentences, nn_model, index_to_token, stats_info=None):
     for sent in sentences:
         prediction = get_nn_response(sent, nn_model, index_to_token)
