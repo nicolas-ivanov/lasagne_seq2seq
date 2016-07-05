@@ -59,11 +59,11 @@ class Lasagne_Seq2seq:
     def _get_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, self.vocab_size),
+        net['l_in_x'] = InputLayer(shape=(None, None),
                                    input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, self.vocab_size),
+        net['l_in_y'] = InputLayer(shape=(None, None),
                                    input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
 
