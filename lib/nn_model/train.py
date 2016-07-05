@@ -7,7 +7,7 @@ import datetime
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
     TEST_PREDICTIONS_FREQUENCY, NN_MODEL_PATH, FULL_LEARN_ITER_NUM, BIG_TEST_PREDICTIONS_FREQUENCY, \
-    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR, TEMPERATURE_VALUES
+    SMALL_TEST_DATASET_SIZE, NN_MODEL_PARAMS_STR, TEMPERATURE_VALUES, ALTERNATE_LINES
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset, plot_loss, \
     transform_lines_to_ids
 from lib.nn_model.predict import get_nn_response
@@ -46,6 +46,7 @@ def save_model(nn_model):
     model_full_path = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_PATH)
     nn_model.save_weights(model_full_path)
 
+
 def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_token):
     token_to_index = dict(zip(index_to_token.values(), index_to_token.keys()))
 
@@ -54,17 +55,24 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     full_data_pass_num = 1
     batch_id = 1
 
-    # tokenized_dialog_lines is an iterator and only allows sequential access, so get array of train lines
-    even_iterator, odd_iterator, iterator_for_validation = tee(tokenized_dialog_lines, 3)
-    even_iterator = islice(even_iterator, 0, None, 2)
-    odd_iterator = islice(odd_iterator, 1, None, 2)
+    x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee(tokenized_dialog_lines, 3)
+    if ALTERNATE_LINES:
+        x_data_iterator = islice(x_data_iterator, 0, None, 2)
+        y_data_iterator = islice(y_data_iterator, 1, None, 2)
+    else:
+        x_data_iterator = islice(x_data_iterator, 0, None)
+        y_data_iterator = islice(y_data_iterator, 1, None)
+
     train_dataset_sample = list(islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE * 2, 2))
     train_dataset_sample = [' '.join(x) for x in train_dataset_sample]
 
-    X_ids = transform_lines_to_ids(even_iterator, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
-    Y_ids = transform_lines_to_ids(odd_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH)
-    x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
-    x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH, reversed=True)
+    n_dialogs = sum(1 for _ in iterator_for_len_calc)
+    X_ids = transform_lines_to_ids(x_data_iterator, token_to_index, INPUT_SEQUENCE_LENGTH, n_dialogs, reversed=True)
+    Y_ids = transform_lines_to_ids(y_data_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH, n_dialogs)
+    x_test = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, len(test_dataset),
+                                    reversed=True)
+    x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH, len(validation_lines),
+                                   reversed=True)
 
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []

@@ -7,12 +7,13 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'movie_lines_cleaned_10k'
+CORPUS_NAME = 'en_subtitles'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
 TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
 SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
+ALTERNATE_LINES = False
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
@@ -29,10 +30,10 @@ USE_GRU = True  # use GRU cells instead of LSTM cells
 CONSTANTLY_FEED_HIDDEN_STATE = False
 HIDDEN_LAYER_DIMENSION = 512
 INPUT_SEQUENCE_LENGTH = 25
-ANSWER_MAX_TOKEN_LENGTH = 25
+ANSWER_MAX_TOKEN_LENGTH = 20
 
 # set training params
-TRAIN_BATCH_SIZE = 512
+TRAIN_BATCH_SIZE = 128
 SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
 SMALL_TEST_DATASET_SIZE = 5
 TEST_PREDICTIONS_FREQUENCY = 500
