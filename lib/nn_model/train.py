@@ -55,7 +55,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     full_data_pass_num = 1
     batch_id = 1
 
-    x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee(tokenized_dialog_lines, 3)
+    x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee(tokenized_dialog_lines, 4)
     if ALTERNATE_LINES:
         x_data_iterator = islice(x_data_iterator, 0, None, 2)
         y_data_iterator = islice(y_data_iterator, 1, None, 2)
