@@ -1,3 +1,4 @@
+from copy import copy
 import codecs
 import logging
 import subprocess
@@ -45,3 +46,9 @@ class ModelLoaderException(Exception):
     pass
 
 
+def tee_nobuffer(iter, n=2):
+    result = []
+    for i in xrange(n - 1):
+        result.append(copy(iter))
+    result.append(iter)
+    return tuple(result)

@@ -1,6 +1,5 @@
 import os
 import sys
-from itertools import tee
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -9,7 +8,7 @@ from configs.config import CORPUS_PATH, PROCESSED_CORPUS_PATH, TOKEN_INDEX_PATH,
 from lib.w2v_model import w2v
 from lib.nn_model.model import get_nn_model
 from lib.nn_model.predict import get_nn_response
-from utils.utils import get_logger
+from utils.utils import get_logger, tee_nobuffer
 
 _logger = get_logger(__name__)
 
@@ -20,7 +19,7 @@ def predict():
         get_processed_dialog_lines_and_index_to_token(CORPUS_PATH, PROCESSED_CORPUS_PATH, TOKEN_INDEX_PATH)
 
     # dualize iterator
-    dialog_lines_for_w2v, dialog_lines_for_nn = tee(processed_dialog_lines)
+    dialog_lines_for_w2v, dialog_lines_for_nn = tee_nobuffer(processed_dialog_lines)
     _logger.info('-----')
 
     # use gensim realisatino of word2vec instead of keras embeddings due to extra flexibility

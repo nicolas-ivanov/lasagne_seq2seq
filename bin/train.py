@@ -1,7 +1,6 @@
 import os
 import sys
 import argparse
-from itertools import tee
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -12,7 +11,7 @@ from lib.w2v_model import w2v
 from lib.nn_model.model import get_nn_model
 from lib.nn_model.train import train_model
 from lib.nn_model.model_utils import transform_w2v_model_to_matrix
-from utils.utils import get_logger
+from utils.utils import get_logger, tee_nobuffer
 
 _logger = get_logger(__name__)
 
@@ -26,7 +25,7 @@ def learn():
 
     # dualize iterator
     if INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC:
-        dialog_lines_for_w2v, dialog_lines_for_nn = tee(processed_dialog_lines)
+        dialog_lines_for_w2v, dialog_lines_for_nn = tee_nobuffer(processed_dialog_lines)
         _logger.info('-----')
 
         # use gensim implementation of word2vec instead of keras embeddings due to extra flexibility

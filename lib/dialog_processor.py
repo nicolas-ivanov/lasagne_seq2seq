@@ -2,12 +2,11 @@ import codecs
 import json
 import os
 from collections import Counter
-from itertools import tee
 
 import nltk.tokenize
 
 from configs.config import VOCAB_MAX_SIZE
-from utils.utils import IterableSentences, get_logger
+from utils.utils import IterableSentences, get_logger, tee_nobuffer
 
 _PUNKT_MARKS = {'.', '?', '!'}
 _tokenizer = nltk.tokenize.RegexpTokenizer(pattern=r'[#]+|[\w\$]+|[^\w\s]')
@@ -65,7 +64,7 @@ def process_corpus(corpus_path):
     iterable_dialog_lines = IterableSentences(corpus_path)
 
     tokenized_dialog_lines = get_tokenized_dialog_lines(iterable_dialog_lines)
-    tokenized_dialog_lines_for_voc, tokenized_dialog_lines_for_transform = tee(tokenized_dialog_lines)
+    tokenized_dialog_lines_for_voc, tokenized_dialog_lines_for_transform = tee_nobuffer(tokenized_dialog_lines)
 
     tokens_voc = get_tokens_voc(tokenized_dialog_lines_for_voc)
     transformed_dialog_lines = get_transformed_dialog_lines(tokenized_dialog_lines_for_transform, tokens_voc)
@@ -109,7 +108,7 @@ def get_processed_dialog_lines_and_index_to_token(corpus_path, processed_corpus_
     # continue here if processed corpus and token index are not stored on the disk
     _logger.info(processed_corpus_path + ' and ' + token_index_path + " don't exist, compute and save it")
     processed_dialog_lines, index_to_token = process_corpus(corpus_path)
-    processed_dialog_lines, processed_dialog_lines_for_save = tee(processed_dialog_lines)
+    processed_dialog_lines, processed_dialog_lines_for_save = tee_nobuffer(processed_dialog_lines)
 
     save_index_to_tokens(index_to_token, token_index_path)
     save_corpus(processed_dialog_lines_for_save, processed_corpus_path)

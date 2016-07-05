@@ -2,7 +2,7 @@ import os
 import random
 import time
 from collections import namedtuple
-from itertools import tee, islice
+from itertools import islice
 import datetime
 
 from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_PATH, SAMPLES_BATCH_SIZE, \
@@ -11,7 +11,7 @@ from configs.config import INPUT_SEQUENCE_LENGTH, ANSWER_MAX_TOKEN_LENGTH, DATA_
 from lib.nn_model.model_utils import update_perplexity_stamps, save_test_results, get_test_dataset, plot_loss, \
     transform_lines_to_ids
 from lib.nn_model.predict import get_nn_response
-from utils.utils import get_logger
+from utils.utils import get_logger, tee_nobuffer
 
 StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_num')
 
@@ -49,7 +49,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     epoches_counter = 1
     batch_id = 1
 
-    x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee(tokenized_dialog_lines, 4)
+    x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee_nobuffer(tokenized_dialog_lines, 4)
     if ALTERNATE_LINES:
         x_data_iterator = islice(x_data_iterator, 0, None, 2)
         y_data_iterator = islice(y_data_iterator, 1, None, 2)

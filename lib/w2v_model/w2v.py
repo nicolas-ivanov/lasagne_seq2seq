@@ -1,11 +1,10 @@
 import os
-from itertools import tee
 import codecs
 
 import numpy as np
 from gensim.models import Word2Vec
 
-from utils.utils import get_logger
+from utils.utils import get_logger, tee_nobuffer
 
 _logger = get_logger(__name__)
 
@@ -16,7 +15,7 @@ def _train_model(tokenized_lines, params):
     _logger.info('Word2Vec model will be trained now. It can take long, so relax and have fun')
     _logger.info('Parameters for training: %s' % params_str)
 
-    tokenized_lines_for_voc, tokenized_lines_for_train = tee(tokenized_lines)
+    tokenized_lines_for_voc, tokenized_lines_for_train = tee_nobuffer(tokenized_lines)
 
     model = Word2Vec(window=int(params['win_size']), max_vocab_size=int(params['vocab_size']),
                      size=int(params['vect_size']),
