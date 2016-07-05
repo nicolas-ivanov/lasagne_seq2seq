@@ -1,10 +1,6 @@
 import os
 import time
 
-
-USE_GRU = True  # use GRU cells instead of LSTM cells
-CONSTANTLY_FEED_HIDDEN_STATE = True
-
 DATA_PATH = '/var/lib/lasagne_seq2seq'
 CORPORA_DIR = 'corpora_raw'
 PROCESSED_CORPORA_DIR = 'corpora_processed'
@@ -20,17 +16,20 @@ SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
-VOCAB_MAX_SIZE = 10000
+VOCAB_MAX_SIZE = 50000
 INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
-USE_PRETRAINED_W2V = True
 LEARN_WORD_EMBEDDINGS = True
 
+USE_PRETRAINED_W2V = False  # instead of learning w2v on the same data, use glove vectors from here:
 GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
+
 #set seq2seq params
+USE_GRU = True  # use GRU cells instead of LSTM cells
+CONSTANTLY_FEED_HIDDEN_STATE = False
 HIDDEN_LAYER_DIMENSION = 512
-INPUT_SEQUENCE_LENGTH = 5
-ANSWER_MAX_TOKEN_LENGTH = 5
+INPUT_SEQUENCE_LENGTH = 25
+ANSWER_MAX_TOKEN_LENGTH = 25
 
 # set training params
 TRAIN_BATCH_SIZE = 512
@@ -57,6 +56,7 @@ W2V_PARAMS = {
     "win_size": 5,
     "workers_num": 25
 }
+
 
 GRAD_CLIP = 10.0
 LEARNING_RATE = 1.0       # hm, what learning rate should be here?
