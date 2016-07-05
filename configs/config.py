@@ -11,8 +11,8 @@ CORPUS_NAME = 'movie_lines_cleaned_10k'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
-TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
-SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', CORPUS_NAME + '.txt')
+TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
+SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
