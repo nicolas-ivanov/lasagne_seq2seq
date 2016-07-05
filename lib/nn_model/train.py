@@ -18,12 +18,6 @@ StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_nu
 _logger = get_logger(__name__)
 
 
-def log_predictions(sentences, nn_model, index_to_token, stats_info=None):
-    for sent in sentences:
-        prediction = get_nn_response(sent, nn_model, index_to_token)
-        _logger.info('[%s] -> [%s]' % (sent, prediction))
-
-
 def get_test_senteces(file_path):
     with open(file_path) as test_data_fh:
         test_sentences = test_data_fh.readlines()
@@ -34,7 +28,7 @@ def get_test_senteces(file_path):
 
 def get_training_batch(X_ids, Y_ids):
     n_objects = X_ids.shape[0]
-    n_batches = n_objects / SAMPLES_BATCH_SIZE - 1
+    n_batches = n_objects / SAMPLES_BATCH_SIZE
     for i in xrange(n_batches):
         start = i * SAMPLES_BATCH_SIZE
         end = (i + 1) * SAMPLES_BATCH_SIZE
@@ -52,7 +46,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
     test_dataset = get_test_dataset()[:SMALL_TEST_DATASET_SIZE]
     start_time = time.time()
-    full_data_pass_num = 1
+    epoches_counter = 1
     batch_id = 1
 
     x_data_iterator, y_data_iterator, iterator_for_validation, iterator_for_len_calc = tee(tokenized_dialog_lines, 4)
@@ -81,24 +75,15 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     batches_num = X_ids.shape[0] / SAMPLES_BATCH_SIZE
 
     try:
-        for full_data_pass_num in xrange(1, FULL_LEARN_ITER_NUM + 1):
+        for epoches_counter in xrange(1, FULL_LEARN_ITER_NUM + 1):
             _logger.info('\nStarting epoche #%d; %d objects processed; time = %0.2f (training of it = %0.2f)' %
-                         (full_data_pass_num, objects_processed, time.time() - start_time, total_training_time))
+                         (epoches_counter, objects_processed, time.time() - start_time, total_training_time))
 
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):
                 prev_time = time.time()
                 loss = nn_model.train(X_train, Y_train)
                 total_training_time += time.time() - prev_time
                 objects_processed += X_train.shape[0]
-                # for i in xrange(5):
-                #     for j in xrange(10):
-                #         print index_to_token[X_train[i, j]], ' ',
-                #     print '>',
-                #     for j in xrange(10):
-                #         print index_to_token[Y_train[i, j]], ' ',
-                #     print
-                #
-                # sys.exit(0)
 
                 loss_history.append((time.time(), loss))
 
@@ -148,7 +133,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
     except (KeyboardInterrupt, SystemExit):
         _logger.info('Training cycle is stopped manually')
-        _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / full_data_pass_num))
+        _logger.info('Current time per full-data-pass iteration: %s' % ((time.time() - start_time) / epoches_counter))
         if len(perplexity_stamps['validation']) > 0:
             save_test_results(nn_model, index_to_token, token_to_index, start_time, batch_id, batches_num,
                               perplexity_stamps)

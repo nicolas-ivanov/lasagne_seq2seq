@@ -12,11 +12,11 @@ def _sample(probs, temperature=1.0):
     """
     helper function to sample an index from a probability array
     """
-    strethced_probs = np.log(probs) / temperature
-    strethced_probs -= np.max(strethced_probs)
-    strethced_probs = np.exp(strethced_probs) / np.sum(np.exp(strethced_probs))
-    idx = np.random.choice(strethced_probs.shape[0], p=strethced_probs)
-    idx_prob = strethced_probs[idx]
+    stretched_probs = np.log(probs) / temperature
+    stretched_probs -= np.max(stretched_probs)
+    stretched_probs = np.exp(stretched_probs) / np.sum(np.exp(stretched_probs))
+    idx = np.random.choice(stretched_probs.shape[0], p=stretched_probs)
+    idx_prob = stretched_probs[idx]
     return idx, idx_prob
 
 
@@ -28,7 +28,7 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
     response = []
     tokens_probs = []
 
-    START_TOKEN_ID = 3 # BECAUSE I SAID SO
+    START_TOKEN_ID = {v: k for k, v in index_to_token.items()}[START_TOKEN]
     curr_y_batch = np.ones((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32) * START_TOKEN_ID
     if len(x_batch.shape) == 1:
         x_batch = x_batch[np.newaxis, :]

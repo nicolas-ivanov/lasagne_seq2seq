@@ -237,8 +237,7 @@ def plot_loss(loss_stamps):
 
 def transform_w2v_model_to_matrix(w2v_model, index_to_token):
     all_words = index_to_token.values()
-    all_ids = index_to_token.keys()
-    token_to_index = dict(zip(all_words, all_ids))
+    token_to_index = {v: k for k, v in index_to_token.items()}
     n_words = len(index_to_token)
     output = np.zeros((n_words, TOKEN_REPRESENTATION_SIZE))
     for word in all_words:
