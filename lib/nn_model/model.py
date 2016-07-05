@@ -59,11 +59,11 @@ class Lasagne_Seq2seq:
     def _get_net(self):
         net = OrderedDict()
 
-        net['l_in_x'] = InputLayer(shape=(None, None),
+        net['l_in_x'] = InputLayer(shape=(None, self.vocab_size),
                                    input_var=T.imatrix(name="enc_ix"),
                                    name="encoder_seq_ix")
 
-        net['l_in_y'] = InputLayer(shape=(None, None),
+        net['l_in_y'] = InputLayer(shape=(None, self.vocab_size),
                                    input_var=T.imatrix(name="dec_ix"),
                                    name="decoder_seq_ix")
 
@@ -71,14 +71,16 @@ class Lasagne_Seq2seq:
             incoming=net['l_in_x'],
             input_size=self.vocab_size,
             output_size=TOKEN_REPRESENTATION_SIZE,
-            W=self.W
+            W=self.W,
+            name="embeddings_layer_x"
         )
 
         net['l_emb_y'] = EmbeddingLayer(
             incoming=net['l_in_y'],
             input_size=self.vocab_size,
             output_size=TOKEN_REPRESENTATION_SIZE,
-            W=self.W
+            W=self.W,
+            name="embeddings_layer_y"
         )
         if not LEARN_WORD_EMBEDDINGS:
             net['l_emb_x'].params[net['l_emb_x'].W].remove('trainable')
