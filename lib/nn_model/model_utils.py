@@ -18,7 +18,7 @@ from utils.utils import get_formatted_time, get_git_revision_short_hash, get_log
 from configs.config import RUN_DATE, TEST_DATASET_PATH, DEFAULT_TEMPERATURE, \
     TEST_RESULTS_PATH, BIG_TEST_RESULTS_PATH, PERPLEXITY_LOG_PATH, PERPLEXITY_PIC_PATH, NN_MODEL_PARAMS_STR, \
     TEMPERATURE_VALUES, SMALL_TEST_DATASET_SIZE, LOSS_LOG_PATH, LOSS_PIC_PATH, INPUT_SEQUENCE_LENGTH, \
-    TOKEN_REPRESENTATION_SIZE
+    TOKEN_REPRESENTATION_SIZE, REVERSE_INPUT
 
 _logger = get_logger(__name__)
 
@@ -41,7 +41,8 @@ def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len, max
     :return: X -- numpy array, dtype=np.int32, shape = (len(lines_to_transform), max_sent_len).
     I-th row contains transformed first max_sent_len tokens of i-th line of lines_to_transform.
     The rest of each line is ignored.
-    if length of a line is less that max_sent_len, it's padded with token_to_index[PAD_TOKEN]
+    if length of a line is less that max_sent_len, it's padded with token_to_index[PAD_TOKEN].
+    Padded from the right if reversed=True, otherwise padded from the left.
     """
     X = np.ones((max_n_lines, max_sent_len), dtype=np.int32) * token_to_index[PAD_TOKEN]
 
@@ -192,13 +193,13 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
 
     test_dataset = get_test_dataset()
     test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, len(test_dataset),
-                                              reversed=True)
+                                              reversed=REVERSE_INPUT)
 
     log_predictions(test_dataset, test_dataset_ids, nn_model, index_to_token, stats_info)
 
     small_test_dataset = test_dataset[:SMALL_TEST_DATASET_SIZE]
     small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH,
-                                                    len(small_test_dataset), reversed=True)
+                                                    len(small_test_dataset), reversed=REVERSE_INPUT)
     _log_predictions_with_temperatures(small_test_dataset, small_test_dataset_ids, nn_model, index_to_token, stats_info)
 
 

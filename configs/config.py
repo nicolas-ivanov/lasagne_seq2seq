@@ -31,10 +31,11 @@ CONSTANTLY_FEED_HIDDEN_STATE = False
 HIDDEN_LAYER_DIMENSION = 512
 INPUT_SEQUENCE_LENGTH = 25
 ANSWER_MAX_TOKEN_LENGTH = 20
+REVERSE_INPUT = True
 
 # set training params
 TRAIN_BATCH_SIZE = 128
-SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
+SAMPLES_BATCH_SIZE = 128
 SMALL_TEST_DATASET_SIZE = 5
 TEST_PREDICTIONS_FREQUENCY = 500
 BIG_TEST_PREDICTIONS_FREQUENCY = 1000
@@ -69,7 +70,7 @@ TEMPERATURE_VALUES = [0.3, 0.5, 0.8, 1.2]
 def get_nn_params_str():
     params_str = '_{cell_type}_{net_type}_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_lr{learning_rate}_gc_{gradient_clip}'
     params_str = params_str.format(cell_type='gru' if USE_GRU else 'lstm',
-                                   net_type='concat' if CONSTANTLY_FEED_HIDDEN_STATE else 'v1',
+                                   net_type='feed' if CONSTANTLY_FEED_HIDDEN_STATE else 'v1',
                                    layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION,
                                    dropout_rate=DROPOUT_RATE,cont_len=INPUT_SEQUENCE_LENGTH,
                                    learning_rate=LEARNING_RATE, gradient_clip=GRAD_CLIP)

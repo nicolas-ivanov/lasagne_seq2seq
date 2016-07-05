@@ -566,7 +566,7 @@ def get_nn_model(vocab_size, w2v_matrix=None):
     _logger.info('NN hidden dimension: %s' % HIDDEN_LAYER_DIMENSION)
     _logger.info('NN output dimension: %s (dict size)' % vocab_size)
 
-    if not w2v_matrix is None:
+    if w2v_matrix:
         model = Lasagne_Seq2seq(vocab_size, w2v_matrix.astype(theano.config.floatX))
     else:
         model = Lasagne_Seq2seq(vocab_size)
