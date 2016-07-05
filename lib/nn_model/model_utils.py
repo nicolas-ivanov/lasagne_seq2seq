@@ -36,9 +36,10 @@ def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len, max
     """
     :param lines_to_transform: list of lists of tokens to transform to ids
     :param token_to_index: dict that maps each token to its id
-    :param max_sent_len:
+    :param max_sent_len: maximum number of tokens in a line
+    :param max_n_lines: maximum number of lines
     :return: X -- numpy array, dtype=np.int32, shape = (len(lines_to_transform), max_sent_len).
-    I-th row contains transformed first max_set_len tokens of i-th line of lines_to_transform.
+    I-th row contains transformed first max_sent_len tokens of i-th line of lines_to_transform.
     The rest of each line is ignored.
     if length of a line is less that max_sent_len, it's padded with token_to_index[PAD_TOKEN]
     """

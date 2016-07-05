@@ -45,7 +45,7 @@ class Lasagne_Seq2seq:
             self.rnn_layer = LSTMLayer
 
         if CONSTANTLY_FEED_HIDDEN_STATE:
-            self.net = self._get_concat_net() # seq2seq v2
+            self.net = self._get_feed_net() # seq2seq v2
         else:
             self.net = self._get_net() # seq2seq v1
         self.train = self._get_train_fun()
@@ -286,7 +286,7 @@ class Lasagne_Seq2seq:
         return net
 
 
-    def _get_concat_net(self):
+    def _get_feed_net(self):
         net = OrderedDict()
 
 
