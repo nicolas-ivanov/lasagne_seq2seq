@@ -5,6 +5,7 @@ from configs.config import TOKEN_REPRESENTATION_SIZE, ANSWER_MAX_TOKEN_LENGTH, T
 from lib.dialog_processor import EOS_SYMBOL, EMPTY_TOKEN, START_TOKEN, get_input_sequence
 from lib.w2v_model.vectorizer import get_token_vector
 from utils.utils import get_logger
+import time
 
 _logger = get_logger(__name__)
 
@@ -28,7 +29,9 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
     response = []
     tokens_probs = []
 
+    start_time = time.time()
     START_TOKEN_ID = {v: k for k, v in index_to_token.items()}[START_TOKEN]
+    find_time = time.time() - start_time
     curr_y_batch = np.ones((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32) * START_TOKEN_ID
     if len(x_batch.shape) == 1:
         x_batch = x_batch[np.newaxis, :]
@@ -51,8 +54,11 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
         i += 1
         curr_y_batch[0][i] = next_token_id
 
+    predict_time = time.time() - find_time
     response_perplexity = get_sequence_perplexity(tokens_probs)
+    perplexity_time = time.time() - predict_time
 
+    print '%0.3f/%0.3f/%0.3f' % (find_time, predict_time, preplexity_time)
     return response, response_perplexity
 
 
