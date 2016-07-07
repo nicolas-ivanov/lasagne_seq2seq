@@ -15,6 +15,7 @@ EOS_SYMBOL = '$$$'
 EMPTY_TOKEN = '###'
 START_TOKEN = '&&&'
 PAD_TOKEN = '___'
+START_TOKEN_ID = 3
 
 _logger = get_logger(__name__)
 
@@ -36,28 +37,32 @@ def get_tokens_voc(tokenized_dialog_lines):
 
 
 def get_transformed_dialog_lines(tokenized_dialog_lines, tokens_voc):
-    for line in tokenized_dialog_lines:
-        transformed_line = []
-
-        for token in line:
-            if token not in tokens_voc:
-                token = EMPTY_TOKEN
-
-            transformed_line.append(token)
-        yield transformed_line
+    """
+    Replaces tokens that are not in tokens_voc with EMPTY_TOKEN
+    :param tokenized_dialog_lines: IterableSentences
+    :param tokens_voc: set of tokens or dict where tokens are keys
+    :return: IterableSentences
+    """
+    return tokenized_dialog_lines.add_postprocessing(lambda x: [t if t in tokens_voc else EMPTY_TOKEN for t in x])
 
 
 def get_tokenized_dialog_lines(iterable_dialog_lines):
-    for line in iterable_dialog_lines:
-        tokenized_dialog_line = tokenize(line)
-        tokenized_dialog_line = [START_TOKEN] + tokenized_dialog_line + [EOS_SYMBOL]
-        yield tokenized_dialog_line
+    """
+    Tokenizes with nltk tokenizer, adds START_TOKEND, EOS_SYMBOL
+    :param iterable_dialog_lines: IterableSentences
+    :return: IterableSentences
+    """
+    return iterable_dialog_lines.add_postprocessing(lambda x: [START_TOKEN] + tokenize(x) + [EOS_SYMBOL])
 
 
 def get_tokenized_dialog_lines_from_processed_corpus(iterable_dialog_lines):
-    for line in iterable_dialog_lines:
-        tokenized_dialog_line = line.strip().split()
-        yield tokenized_dialog_line
+    """
+    Splits lines into tokens.
+    :param iterable_dialog_lines: IterableSentences
+    :return: IterableSentences
+    """
+
+    return iterable_dialog_lines.add_postprocessing(lambda x: x.split())
 
 
 def process_corpus(corpus_path):
@@ -67,7 +72,7 @@ def process_corpus(corpus_path):
     tokenized_dialog_lines_for_voc, tokenized_dialog_lines_for_transform = tee_nobuffer(tokenized_dialog_lines)
 
     tokens_voc = get_tokens_voc(tokenized_dialog_lines_for_voc)
-    transformed_dialog_lines = get_transformed_dialog_lines(tokenized_dialog_lines_for_transform, tokens_voc)
+    transformed_dialog_lines = get_transformed_dialog_lines(tokenized_dialog_lines_for_transform, set(tokens_voc))
 
     _logger.info('Token voc size = ' + str(len(tokens_voc)))
     index_to_token = dict(enumerate(tokens_voc))
@@ -117,17 +122,20 @@ def get_processed_dialog_lines_and_index_to_token(corpus_path, processed_corpus_
 
 
 def get_lines_for_validation(validation_set_path, index_to_token):
+    """
+    The key difference is that this function uses prepared index_to_token dict instead of Counting words and
+    preparing the dict.
+    :param validation_set_path: path to dataset
+    :param index_to_token:  dict id: token
+    :return:
+    """
     with codecs.open(validation_set_path, 'r', 'utf-8') as dataset_fh:
-        lines = dataset_fh.readlines()
-        lines = [tokenize(line.strip()) for line in lines]
-        screened_lines = get_transformed_dialog_lines(lines, index_to_token.values())
+        iterable_lines = IterableSentences(validation_set_path)
+        tokenized_lines = get_tokenized_dialog_lines(iterable_lines)
+        token_voc = set(index_to_token.values())
+        screened_lines = get_transformed_dialog_lines(tokenized_lines, token_voc)
 
-    # return true array, not iterator
-    lines_for_validation = []
-    for line in screened_lines:
-        lines_for_validation.append(line)
-
-    return lines_for_validation
+    return list(screened_lines)
 
 
 def tokenize(text):

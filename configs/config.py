@@ -7,12 +7,11 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'en_subtitles'
+CORPUS_NAME = 'movie_lines_cleaned_10k'
 CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
 # CORPUS_NAME = 'dialogs_50mb'
 # CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
 TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
-SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
 ALTERNATE_LINES = False
 
 # set word2vec params

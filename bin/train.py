@@ -5,7 +5,7 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.dialog_processor import get_processed_dialog_lines_and_index_to_token, get_lines_for_validation
-from configs.config import CORPUS_PATH, PROCESSED_CORPUS_PATH, TOKEN_INDEX_PATH, W2V_PARAMS, SMALL_TEST_DATASET_PATH, \
+from configs.config import CORPUS_PATH, PROCESSED_CORPUS_PATH, TOKEN_INDEX_PATH, W2V_PARAMS, TEST_DATASET_PATH, \
     INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC
 from lib.w2v_model import w2v
 from lib.nn_model.model import get_nn_model
@@ -21,7 +21,7 @@ def learn():
     processed_dialog_lines, index_to_token = \
         get_processed_dialog_lines_and_index_to_token(CORPUS_PATH, PROCESSED_CORPUS_PATH, TOKEN_INDEX_PATH)
 
-    lines_for_validation = get_lines_for_validation(SMALL_TEST_DATASET_PATH, index_to_token)
+    lines_for_validation = get_lines_for_validation(TEST_DATASET_PATH, index_to_token)
 
     # dualize iterator
     if INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC:

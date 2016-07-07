@@ -25,12 +25,6 @@ _logger = get_logger(__name__)
 StatsInfo = namedtuple('StatsInfo', 'start_time, iteration_num, sents_batches_num, perplexity')
 
 
-def get_test_dataset():
-    with codecs.open(TEST_DATASET_PATH, 'r', 'utf-8') as fh:
-        test_dataset = [s.strip() for s in fh.readlines()]
-
-    return test_dataset
-
 
 def transform_lines_to_ids(lines_to_transform, token_to_index, max_sent_len, max_n_lines, reversed=False):
     """
@@ -180,7 +174,7 @@ def log_predictions(sentences, sentences_ids, nn_model, index_to_token, stats_in
             csv_writer.writerow(['', sent, prediction, str(perplexity)])
 
 
-def save_test_results(nn_model, index_to_token, token_to_index, start_time, current_batch_idx, all_batches_num,
+def save_test_results(validation_lines, nn_model, index_to_token, token_to_index, start_time, current_batch_idx, all_batches_num,
                       perplexity_stamps):
     _logger.info('Saving current test results...')
     plot_perplexities(perplexity_stamps)
@@ -191,7 +185,7 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
 
     stats_info = StatsInfo(start_time, current_batch_idx, all_batches_num, cur_perplexity_val)
 
-    test_dataset = get_test_dataset()
+    test_dataset = validation_lines
     test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH, len(test_dataset),
                                               reversed=REVERSE_INPUT)
 
@@ -201,7 +195,6 @@ def save_test_results(nn_model, index_to_token, token_to_index, start_time, curr
     small_test_dataset_ids = transform_lines_to_ids(test_dataset, token_to_index, INPUT_SEQUENCE_LENGTH,
                                                     len(small_test_dataset), reversed=REVERSE_INPUT)
     _log_predictions_with_temperatures(small_test_dataset, small_test_dataset_ids, nn_model, index_to_token, stats_info)
-
 
 
 
