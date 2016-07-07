@@ -59,6 +59,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     train_dataset_sample = list(islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE * 2, 2))
     train_dataset_sample = [' '.join(x) for x in train_dataset_sample]
 
+    _logger.info('Iterating through lines to get number of elements in the dataset')
     n_dialogs = sum(1 for _ in iterator_for_len_calc)
 
     _logger.info('Iterating through lines to get input matrix')
@@ -71,12 +72,6 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
     _logger.info('Finished! Start training')
 
-    for i in xrange(5):
-        for j in xrange(INPUT_SEQUENCE_LENGTH):
-            print index_to_token[x_val[i, j]], ' ',
-        print
-
-    print
 
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
@@ -109,7 +104,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                     _logger.info(NN_MODEL_PARAMS_STR)
 
                     _logger.info('Test dataset:')
-                    for i, sent in enumerate(validation_lines):
+                    for i, sent in enumerate(validation_lines)[:SMALL_TEST_DATASET_SIZE]:
                         for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(x_val[i], nn_model, index_to_token, temperature=t)
                             _logger.info('%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity,

@@ -31,7 +31,7 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
 
     start_time = time.time()
     START_TOKEN_ID = {v: k for k, v in index_to_token.items()}[START_TOKEN]
-    find_time = time.time() - start_time
+    find_time = time.time()
     curr_y_batch = np.ones((1, ANSWER_MAX_TOKEN_LENGTH), dtype=np.int32) * START_TOKEN_ID
     if len(x_batch.shape) == 1:
         x_batch = x_batch[np.newaxis, :]
@@ -54,11 +54,11 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
         i += 1
         curr_y_batch[0][i] = next_token_id
 
-    predict_time = time.time() - find_time
+    predict_time = time.time()
     response_perplexity = get_sequence_perplexity(tokens_probs)
-    perplexity_time = time.time() - predict_time
+    perplexity_time = time.time()
 
-    print '%0.3f/%0.3f/%0.3f' % (find_time, predict_time, perplexity_time)
+    print '%0.3f/%0.3f/%0.3f' % (find_time - start_time, predict_time - find_time, perplexity_time - find_time)
     return response, response_perplexity
 
 
