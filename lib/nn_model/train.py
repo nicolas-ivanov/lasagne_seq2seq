@@ -104,7 +104,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                     _logger.info(NN_MODEL_PARAMS_STR)
 
                     _logger.info('Test dataset:')
-                    for i, sent in enumerate(validation_lines)[:SMALL_TEST_DATASET_SIZE]:
+                    for i, sent in enumerate(validation_lines[:SMALL_TEST_DATASET_SIZE]):
                         for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(x_val[i], nn_model, index_to_token, temperature=t)
                             _logger.info('%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity,
