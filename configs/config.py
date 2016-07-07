@@ -7,29 +7,33 @@ PROCESSED_CORPORA_DIR = 'corpora_processed'
 W2V_MODELS_DIR = 'w2v_models'
 
 # set paths of training and testing sets
-CORPUS_NAME = 'repeated_phrases'
-CORPUS_PATH = os.path.join('data/train', CORPUS_NAME + '.txt')
-# CORPUS_NAME = 'dialogs_50mb'
-# CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
-TEST_DATASET_PATH = os.path.join('data', 'test', 'repeated_phrases.txt')
-SMALL_TEST_DATASET_PATH = os.path.join('data', 'test', 'repeated_phrases.txt')
+CORPUS_NAME = 'dialogs_50mb'
+CORPUS_PATH = os.path.join(DATA_PATH, CORPORA_DIR, CORPUS_NAME + '.txt')
+TEST_DATASET_PATH = os.path.join('data', 'test', 'testset.txt')
+ALTERNATE_LINES = False
 
 # set word2vec params
 TOKEN_REPRESENTATION_SIZE = 200
-VOCAB_MAX_SIZE = 22000
-USE_PRETRAINED = True
+VOCAB_MAX_SIZE = 50000
+INITIALIZE_WORD_EMBEDDINGS_WITH_WORD2VEC = True
+LEARN_WORD_EMBEDDINGS = True
+
+USE_PRETRAINED_W2V = False  # instead of learning w2v on the same data, use glove vectors from here:
 GLOVE_MODEL_PATH = 'data/glove.6B.200d.txt' # You can find this file here http://nlp.stanford.edu/data/glove.6B.zip
 
+
 #set seq2seq params
+USE_GRU = True  # use GRU cells instead of LSTM cells
+CONSTANTLY_FEED_HIDDEN_STATE = False
 HIDDEN_LAYER_DIMENSION = 512
-INPUT_SEQUENCE_LENGTH = 15
-ANSWER_MAX_TOKEN_LENGTH = 12
+INPUT_SEQUENCE_LENGTH = 25
+ANSWER_MAX_TOKEN_LENGTH = 20
+REVERSE_INPUT = True
 
 # set training params
-TRAIN_BATCH_SIZE = 512
-SAMPLES_BATCH_SIZE = TRAIN_BATCH_SIZE
+SAMPLES_BATCH_SIZE = 128
 SMALL_TEST_DATASET_SIZE = 5
-TEST_PREDICTIONS_FREQUENCY = 50
+TEST_PREDICTIONS_FREQUENCY = 500
 BIG_TEST_PREDICTIONS_FREQUENCY = 1000
 FULL_LEARN_ITER_NUM = 5000
 
@@ -39,7 +43,7 @@ PROCESSED_CORPUS_PATH = os.path.join(DATA_PATH, PROCESSED_CORPORA_DIR, CORPUS_NA
 
 # w2v params that depend on previous params
 W2V_PARAMS = {
-    "use_pretrained": USE_PRETRAINED,
+    "use_pretrained": USE_PRETRAINED_W2V,
     "txt_path": GLOVE_MODEL_PATH,
     "corpus_name": CORPUS_NAME,
     "save_path": DATA_PATH,
@@ -51,17 +55,21 @@ W2V_PARAMS = {
     "workers_num": 25
 }
 
-GRAD_CLIP = 100.
-LEARNING_RATE = 0.05       # hm, what learning rate should be here?
+
+GRAD_CLIP = 5.0
+LEARNING_RATE = 1.0       # hm, what learning rate should be here?
 NN_LAYERS_NUM = 1
 DROPOUT_RATE = 0.5
 DEFAULT_TEMPERATURE = 0.7
 TEMPERATURE_VALUES = [0.3, 0.5, 0.8, 1.2]
 
 def get_nn_params_str():
-    params_str = '_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_bs{batch_size}'
-    params_str = params_str.format(layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION, dropout_rate=DROPOUT_RATE,
-                                   cont_len=INPUT_SEQUENCE_LENGTH, batch_size=TRAIN_BATCH_SIZE)
+    params_str = '_{cell_type}_{net_type}_ln{layers_num}_hd{hidden_dim}_d{dropout_rate}_cl{cont_len}_lr{learning_rate}_gc_{gradient_clip}'
+    params_str = params_str.format(cell_type='gru' if USE_GRU else 'lstm',
+                                   net_type='feed' if CONSTANTLY_FEED_HIDDEN_STATE else 'v1',
+                                   layers_num=NN_LAYERS_NUM, hidden_dim=HIDDEN_LAYER_DIMENSION,
+                                   dropout_rate=DROPOUT_RATE,cont_len=INPUT_SEQUENCE_LENGTH,
+                                   learning_rate=LEARNING_RATE, gradient_clip=GRAD_CLIP)
 
     return params_str
 

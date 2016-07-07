@@ -1,3 +1,4 @@
+from copy import copy
 import codecs
 import logging
 import subprocess
@@ -19,12 +20,25 @@ def get_formatted_time(seconds):
 
 
 class IterableSentences(object):
-    def __init__(self, filename):
+    def __init__(self, filename, postprocessing=None):
         self._filename = filename
+        if postprocessing:
+            self._postprocessing = postprocessing
+        else:
+            self._postprocessing = []
 
     def __iter__(self):
         for line in codecs.open(self._filename, 'r', 'utf-8'):
-            yield line.strip()
+            for f in self._postprocessing:
+                line = f(line)
+            yield line
+
+    def __copy__(self):
+        return IterableSentences(self._filename, self._postprocessing)
+
+    def add_postprocessing(self, f):
+        self._postprocessing.append(f)
+        return self
 
 
 def rolling_window(token_sequence, window_size):
@@ -45,3 +59,9 @@ class ModelLoaderException(Exception):
     pass
 
 
+def tee_nobuffer(iter, n=2):
+    result = []
+    for i in xrange(n - 1):
+        result.append(copy(iter))
+    result.append(iter)
+    return tuple(result)

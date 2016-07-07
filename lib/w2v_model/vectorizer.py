@@ -11,6 +11,7 @@ def get_token_vector(token, model):
     if token in model.vocab:
         return np.array(model[token])
 
+    # if empty token exists (there was a word that didn't occur in the training set so we created it)
     if EMPTY_TOKEN in model.vocab:
         return np.array(model[EMPTY_TOKEN])
 
