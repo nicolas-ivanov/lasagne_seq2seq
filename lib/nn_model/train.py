@@ -71,7 +71,6 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
     _logger.info('Finished! Start training')
 
-
     perplexity_stamps = {'validation': [], 'training': []}
     loss_history = []
     objects_processed = 0
@@ -80,7 +79,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
 
     try:
         for epoches_counter in xrange(1, FULL_LEARN_ITER_NUM + 1):
-            _logger.info('\nStarting epoche #%d; %d objects processed; time = %0.2f (training of it = %0.2f)' %
+            _logger.info('\nStarting epoch #%d; %d objects processed; time = %0.2f (training of it = %0.2f)' %
                          (epoches_counter, objects_processed, time.time() - start_time, total_training_time))
 
             for X_train, Y_train in get_training_batch(X_ids, Y_ids):

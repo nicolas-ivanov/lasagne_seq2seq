@@ -15,7 +15,6 @@ EOS_SYMBOL = '$$$'
 EMPTY_TOKEN = '###'
 START_TOKEN = '&&&'
 PAD_TOKEN = '___'
-START_TOKEN_ID = 3
 
 _logger = get_logger(__name__)
 
