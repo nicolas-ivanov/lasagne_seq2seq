@@ -97,7 +97,7 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                 expected_time_per_epoch = avr_time_per_sample * batches_num
 
                 print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
-                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600)
+                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 1:
                     _logger.info(str(datetime.datetime.now().time()))
