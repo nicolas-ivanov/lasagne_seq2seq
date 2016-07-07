@@ -392,14 +392,14 @@ class Lasagne_Seq2seq:
 
         all_params = get_all_params(self.net['l_dist'], trainable=True)
 
-        print("Computing train updates...")
+        _logger.info("Computing train updates...")
         updates = lasagne.updates.adadelta(
             loss_or_grads=cost,
             params=all_params,
             learning_rate=LEARNING_RATE
         )
 
-        print("Compiling train function...")
+        _logger.info("Compiling train function...")
         train_fun = theano.function(
             inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
             outputs=cost,
@@ -412,7 +412,7 @@ class Lasagne_Seq2seq:
     def _get_predict_fun(self):
         output_probs = get_output(self.net['l_dist'], deterministic=True)           # "long" 2d matrix with prob distribution
 
-        print("Compiling predict function...")
+        _logger.info("Compiling predict function...")
         predict_fun = theano.function(
             inputs=[self.net['l_in_x'].input_var, self.net['l_in_y'].input_var],
             outputs=output_probs,
@@ -551,13 +551,13 @@ class Lasagne_Seq2seq:
             pickle.dump(data, f)
 
     def print_layer_shapes(self):
-        print '\n', '-'*100
-        print 'Net shapes:\n'
+        _logger.info('-' * 100)
+        _logger.info('Net shapes:')
 
         layers = get_all_layers(self.net['l_dist'])
         for l in layers:
-            print '%-20s \t%s' % (l.name, get_output_shape(l))
-        print '\n', '-'*100
+            _logger.info('%-20s \t%s' % (l.name, get_output_shape(l)))
+        _logger.info('-' * 100)
 
 
 def get_nn_model(vocab_size, w2v_matrix=None):

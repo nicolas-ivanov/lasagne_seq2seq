@@ -58,7 +58,7 @@ def _predict_sequence(x_batch, nn_model, index_to_token, temperature):
     response_perplexity = get_sequence_perplexity(tokens_probs)
     perplexity_time = time.time() - predict_time
 
-    print '%0.3f/%0.3f/%0.3f' % (find_time, predict_time, preplexity_time)
+    print '%0.3f/%0.3f/%0.3f' % (find_time, predict_time, perplexity_time)
     return response, response_perplexity
 
 

@@ -36,7 +36,7 @@ def get_training_batch(X_ids, Y_ids):
 
 
 def save_model(nn_model):
-    print 'Saving model...'
+    _logger.info('Saving model...')
     model_full_path = os.path.join(DATA_PATH, 'nn_models', NN_MODEL_PATH)
     nn_model.save_weights(model_full_path)
 
@@ -60,11 +60,16 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
     train_dataset_sample = [' '.join(x) for x in train_dataset_sample]
 
     n_dialogs = sum(1 for _ in iterator_for_len_calc)
+
+    _logger.info('Iterating through lines to get input matrix')
     X_ids = transform_lines_to_ids(x_data_iterator, token_to_index, INPUT_SEQUENCE_LENGTH, n_dialogs, reversed=REVERSE_INPUT)
+    _logger.info('Iterating through lines to get output matrix')
     Y_ids = transform_lines_to_ids(y_data_iterator, token_to_index, ANSWER_MAX_TOKEN_LENGTH, n_dialogs)
+    _logger.info('Iterating through lines to get validation matrix')
     x_val = transform_lines_to_ids(validation_lines, token_to_index, INPUT_SEQUENCE_LENGTH, len(validation_lines),
                                    reversed=REVERSE_INPUT)
 
+    _logger.info('Finished! Start training')
 
     for i in xrange(5):
         for j in xrange(INPUT_SEQUENCE_LENGTH):
@@ -96,24 +101,26 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
                 avr_time_per_sample = (time.time() - start_time) / batch_id
                 expected_time_per_epoch = avr_time_per_sample * batches_num
 
-                print '\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
-                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600),
+                _logger.info('\rbatch iteration: %s / %s (%.2f%%) \t\tloss: %.2f \t\t time per epoch: %.2f h' \
+                      % (batch_id, batches_num, progress, loss, expected_time_per_epoch / 3600))
 
                 if batch_id % TEST_PREDICTIONS_FREQUENCY == 1:
-                    print '\n', datetime.datetime.now().time()
-                    print NN_MODEL_PARAMS_STR, '\n'
+                    _logger.info(str(datetime.datetime.now().time()))
+                    _logger.info(NN_MODEL_PARAMS_STR)
 
-                    print 'Test dataset:'
+                    _logger.info('Test dataset:')
                     for i, sent in enumerate(validation_lines):
                         for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(x_val[i], nn_model, index_to_token, temperature=t)
-                            print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity, prediction)
-                    print
-                    print 'Train dataset:'
+                            _logger.info('%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity,
+                                                                                prediction))
+
+                    _logger.info('Train dataset:')
                     for i, sent in enumerate(train_dataset_sample):
                         for t in TEMPERATURE_VALUES:
                             prediction, perplexity = get_nn_response(X_ids[i], nn_model, index_to_token, temperature=t)
-                            print '%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity, prediction)
+                            _logger.info('%-35s\t --t=%0.3f--> \t[%.2f]\t%s' % (' '.join(sent), t, perplexity,
+                                                                                prediction))
 
                 if batch_id % BIG_TEST_PREDICTIONS_FREQUENCY == 0:
                     plot_loss(loss_history)
