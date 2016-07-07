@@ -57,7 +57,8 @@ def train_model(nn_model,tokenized_dialog_lines, validation_lines, index_to_toke
         y_data_iterator = islice(y_data_iterator, 1, None)
 
     train_dataset_sample = list(islice(iterator_for_validation, 0, SMALL_TEST_DATASET_SIZE * 2, 2))
-    train_dataset_sample = [' '.join(x) for x in train_dataset_sample]
+    
+    print train_dataset_sample
 
     _logger.info('Iterating through lines to get number of elements in the dataset')
     n_dialogs = sum(1 for _ in iterator_for_len_calc)
