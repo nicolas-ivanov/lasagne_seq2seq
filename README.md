@@ -53,7 +53,7 @@ Results:
 Params:
 
 * 1 encoding lstm, 1 decoding lstm
-* vocabulary sizee =  22k tokens
+* vocabulary size =  22k tokens
 * hidden state dimensionality = 512
 * sequence length = 15
 * 2 days of training on Nvidia Grid K520
